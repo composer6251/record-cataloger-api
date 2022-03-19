@@ -1,6 +1,9 @@
 package com.recordcataloguer.recordcataloguer.controller;
 
+import com.recordcataloguer.recordcataloguer.service.EbayService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,10 +12,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @CrossOrigin(origins = "http://localhost:62440") // Allow from app
 public class RecordController {
+    @Autowired
+    private EbayService ebayService;
 
-    @GetMapping("/test")
-    public void testEndpoint(){
-        log.error("API!!!!");
+    @GetMapping("/ebay/auth")
+    public ResponseEntity<String> getEbayAuthorization(){
+        log.debug("Request received for ebay auth");
+        return ebayService.getEbayAuthorization();
+
     }
-
 }

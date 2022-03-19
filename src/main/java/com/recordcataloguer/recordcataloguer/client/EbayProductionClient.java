@@ -1,2 +1,4 @@
-package com.recordcataloguer.recordcataloguer.client;public interface EbayProductionClient {
+package com.recordcataloguer.recordcataloguer.client;
+
+public interface EbayProductionClient {
 }
