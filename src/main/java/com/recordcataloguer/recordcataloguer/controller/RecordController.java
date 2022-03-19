@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = "http://localhost:62440") // Allow from app
+@CrossOrigin(origins = "http://10.116.244.134") // Allow from app
 public class RecordController {
 
     @GetMapping("/test")
