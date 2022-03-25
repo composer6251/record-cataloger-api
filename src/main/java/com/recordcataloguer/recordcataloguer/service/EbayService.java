@@ -14,6 +14,7 @@ import java.util.Map;
 @Service
 @Slf4j
 public class EbayService {
+    @Autowired
     private EbaySandboxClient ebayClient;
 
     private Map<String, String> headers = new HashMap<>();
