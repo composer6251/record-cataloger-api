@@ -1,11 +1,12 @@
 package com.recordcataloguer.recordcataloguer.client;
 
-import com.recordcataloguer.recordcataloguer.config.FeignConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "feign-client", url = EbayUrls.EBAY_SANDBOX_BASE_URL, configuration = FeignConfiguration.class)
+@Component
+@FeignClient(name = "ebayService", url = EbayUrls.EBAY_SANDBOX_BASE_URL)
 public interface EbaySandboxClient {
 
     //todo: Configure ebay request
@@ -13,10 +14,14 @@ public interface EbaySandboxClient {
     ResponseEntity<String> getEbaySandboxAuthorization(
             @RequestHeader("Content-Type") String contentType,
             @RequestHeader("Authorization") String authorization,
-            @RequestParam("grant_type") String grant_type);
+            @RequestParam("grant_type") String grant_type
+    );
 
-//    @GetMapping(name = "name", value = EbayUrls.CATALOG_API_SEARCH_PATH, consumes = "application/json")
+//    @GetMapping(value = EbayUrls.CATALOG_API_SEARCH_PATH, consumes = "application/json")
 //    ResponseEntity<String> searchAlbumByArtistAndAlbumName(
+//            @RequestHeader("Content-Type") String contentType,
+//            @RequestHeader("Authorization") String authorization,
+//            @RequestParam("q") String q
 //
 //    );
 }
