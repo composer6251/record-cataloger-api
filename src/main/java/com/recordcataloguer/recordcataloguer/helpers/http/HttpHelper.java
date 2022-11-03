@@ -1,7 +1,5 @@
 package com.recordcataloguer.recordcataloguer.helpers.http;
 
-import com.recordcataloguer.recordcataloguer.client.EbayUrls;
-
 import java.io.IOException;
 import java.net.*;
 import java.net.http.HttpClient;

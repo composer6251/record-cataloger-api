@@ -14,3 +14,9 @@ feign:
 #        encoder: com.example.SimpleEncoder
 #        decoder: com.example.SimpleDecoder
 #        contract: com.example.SimpleContract
+
+spring:
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.web: INFO

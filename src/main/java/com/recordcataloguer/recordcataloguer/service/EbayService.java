@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.service;
 
-import com.recordcataloguer.recordcataloguer.client.EbaySandboxClient;
-import com.recordcataloguer.recordcataloguer.client.EbayUrls;
+import com.recordcataloguer.recordcataloguer.client.ebay.EbaySandboxClient;
+import com.recordcataloguer.recordcataloguer.client.ebay.EbayUrls;
 import com.recordcataloguer.recordcataloguer.helpers.encode.ImageEncodingHelper;
 import com.recordcataloguer.recordcataloguer.helpers.http.HttpHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;

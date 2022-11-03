@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.client;
+package com.recordcataloguer.recordcataloguer.client.ebay;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;

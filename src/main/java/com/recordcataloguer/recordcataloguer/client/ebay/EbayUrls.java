@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.client;
+package com.recordcataloguer.recordcataloguer.client.ebay;
 
 import lombok.Data;
 

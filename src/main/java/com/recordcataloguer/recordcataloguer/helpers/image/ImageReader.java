@@ -3,6 +3,8 @@ package com.recordcataloguer.recordcataloguer.helpers.image;
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
 import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,17 +26,9 @@ import java.util.List;
  * ****Server Error
  * 500
  */
+@Slf4j
 public class ImageReader {
 
-//    public static void main(String[] args) throws IOException {
-//        detectText();
-//    }
-//    public static void detectText() throws IOException {
-//        String filePath = "src/main/resources/images/kindaBlurry.jpg";
-//        detectText(filePath);
-//    }
-
-    // Detects text in the specified image.
     public static List<String> detectText(String filePath) throws IOException {
         List<AnnotateImageRequest> requests = new ArrayList<>();
 
@@ -62,12 +56,26 @@ public class ImageReader {
                 }
 
                 // TODO: Do I need a loop?
+                // TODO: Implementation of List<String>
                 // For full list of available annotations, see http://g.co/cloud/vision/docs
-                for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
-                    List<String> catalogueNumber = ImageReaderRegex.extractRecordCatalogueNumber(annotation.getDescription());
-                    client.close();
-                    return catalogueNumber;
+//                for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
+//                    List<String> catalogueNumber = ImageReaderRegex.extractRecordCatalogueNumber(annotation.getDescription());
+//                    client.close();
+//                    return catalogueNumber;
+//                }
+                //TODO: implementation of String
+                log.info("Result from Cloud Vision for file {} \n{}", filePath, res.getTextAnnotationsList().get(0));
+                if(!res.getTextAnnotationsList().isEmpty()) {
+//                    log.info("Result from Cloud Vision for file {} \n{}", filePath, res.getTextAnnotationsList().get(0));
+                    return ImageReaderRegex.extractRecordCatalogueNumber(res.getTextAnnotationsList().get(0).getDescription());
                 }
+                //
+                // APP IDEAS
+                // Take picture of multiple albums
+                // Display all albums found
+                // User selects which ones to add to collection
+                // User looks at collection and has the option (if UPC exists) to print out barcode with UPC
+
             }
         }
         catch(IOException exception) {

@@ -36,3 +36,28 @@ Where is the jnilept bin?
 Find it and update library path
 Or
 Try tess4j?
+
+
+
+#DISCOGS APIs
+
+## Database API
+### Search Endpoint
+#### Example: https://api.discogs.com/database/search?release_title=nevermind&artist=nirvana&per_page=3&page=1
+
+
+#Flow to get album info from 3rd party APIs
+### Send to Discogs with catno
+    #### Filter out non US(UK?)
+    #### What to do with multiples?
+    #### Use barcode to look up correct one
+
+###Or
+    #### Filter out non US
+    #### Filter duplicate artists/title
+    #### Can I find a dependable barcode?
+
+###Or
+    #### Just grab first result object and present to user. Is this dependable? Need to test
+    #### Filter duplicate artists/title
+    #### Present options to user and let them select or manual lookup
