@@ -61,3 +61,22 @@ Try tess4j?
     #### Just grab first result object and present to user. Is this dependable? Need to test
     #### Filter duplicate artists/title
     #### Present options to user and let them select or manual lookup
+
+
+
+###Setting up Spring GCP for image analysis from Google Vision API
+####Link to spring-cloud-gcp vision sample how to: repo: https://github.com/GoogleCloudPlatform/spring-cloud-gcp/tree/main/spring-cloud-gcp-samples/spring-cloud-gcp-vision-api-sample
+Add POM dependencies
+
+####Add authentication
+go to: https://cloud.google.com/iam/docs/using-workload-identity-federation#github-actions_1
+click on Enable the APIs button
+Enable the APIs for the service account you have created
+When you are done, go to https://console.cloud.google.com
+This should take you to the Google cloud console and have your project number/project id needed for next steps
+##TODO: FINISH USING DEFAULT AUTH SETUP. APP KEY IS UNSECURE
+
+
+####AUTH WITH APP KEY. THIS SHOULD BE CHANGED!!!!
+Check directory Users/<user>/ for a hidden json file such as "....cloud-vision"
+Add spring.cloud.gcp.credentials.location=file:/path/to/file.json to application properties

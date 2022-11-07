@@ -1,6 +1,6 @@
 package com.recordcataloguer.recordcataloguer.client.discogs;
 
-import com.recordcataloguer.recordcataloguer.dto.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

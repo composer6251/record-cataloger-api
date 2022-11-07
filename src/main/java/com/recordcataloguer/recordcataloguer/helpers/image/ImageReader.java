@@ -1,19 +1,13 @@
 package com.recordcataloguer.recordcataloguer.helpers.image;
 
 import com.google.cloud.vision.v1.*;
-import com.google.protobuf.ByteString;
-import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /***

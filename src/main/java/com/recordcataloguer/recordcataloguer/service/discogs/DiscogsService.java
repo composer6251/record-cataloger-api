@@ -1,9 +1,8 @@
-package com.recordcataloguer.recordcataloguer.service.Discog;
+package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
-import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsUrls;
-import com.recordcataloguer.recordcataloguer.dto.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
-public class DiscogService {
+public class DiscogsService {
 
     @Autowired
     DiscogsClient discogsClient;
-    private String catNo;
+    private String catNo = "AR 34001";
     private String country = "US";
 
     public ResponseEntity<DiscogsSearchResponse> lookupUpRecordByCatalogueNumber(){

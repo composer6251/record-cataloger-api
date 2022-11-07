@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.dto;
+package com.recordcataloguer.recordcataloguer.http.discogs;
 
 import java.util.ArrayList;
 
