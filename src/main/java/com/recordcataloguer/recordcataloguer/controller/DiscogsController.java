@@ -5,10 +5,13 @@ import com.recordcataloguer.recordcataloguer.service.EbayService;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.awt.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpResponse;
@@ -20,6 +23,15 @@ public class DiscogsController {
 
     @Autowired
     private DiscogsService discogsService;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    @Autowired
+    private CloudVisionTemplate cloudVisionTemplate;
+
+    @Autowired
+    private ImageReader imageReader;
 
     @GetMapping("/extractTextFromImage")
     public ModelAndView extractTextFromImage(@PathVariable String url)
@@ -52,7 +64,6 @@ public class DiscogsController {
             throws URISyntaxException, IOException, InterruptedException {
         log.debug("Request received for text extraction");
 
-        ImageReader imageReader = new ImageReader();
         ModelAndView modelAndView;
 
         modelAndView = imageReader.extractTextFromImage(url);

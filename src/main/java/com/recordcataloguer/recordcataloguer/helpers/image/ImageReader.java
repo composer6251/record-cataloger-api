@@ -5,9 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.io.File;
 import java.util.List;
 
 /***
@@ -25,6 +29,7 @@ import java.util.List;
  * ****Server Error
  * 500
  */
+@Service
 @Slf4j
 public class ImageReader {
 
@@ -34,11 +39,27 @@ public class ImageReader {
     @Autowired
     private CloudVisionTemplate cloudVisionTemplate;
 
-    // Get text from single Image
-    public ModelAndView extractTextFromImage(String imageUrl) {
+    // get text from List/Map of images
+//    public ModelAndView extractTextFromImageList(Map<String, String>)
 
-        AnnotateImageResponse response = this.cloudVisionTemplate.analyzeImage(
-                this.resourceLoader.getResource(imageUrl)
+    // get label from image
+    public ModelAndView extractTextFromImage(String imageUrl) {
+        String text =
+                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
+
+        ModelMap map = new ModelMap();
+        map.addAttribute("text", text);
+        map.addAttribute("imageUrl", imageUrl);
+
+        return new ModelAndView("result", map);
+    }
+
+    // Get labels from single Image
+    public ModelAndView extractLabelFromImage(String imageUrl) {
+
+        File file = new File(imageUrl);
+        AnnotateImageResponse response = cloudVisionTemplate.analyzeImage(
+                resourceLoader.getResource(imageUrl)
         );
 
         List<EntityAnnotation> annotations = response.getLabelAnnotationsList();
@@ -51,11 +72,6 @@ public class ImageReader {
         ModelAndView modelAndView = new ModelAndView("result", map);
         return new ModelAndView("result", map);
     }
-
-    // get text from List/Map of images
-//    public ModelAndView extractTextFromImageList(Map<String, String>)
-
-    // get label from image
 
     // get text from PDF
 
