@@ -37,7 +37,7 @@ Find it and update library path
 Or
 Try tess4j?
 
-
+#Cloud Vision APIs
 
 #DISCOGS APIs
 
