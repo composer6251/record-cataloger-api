@@ -5,8 +5,8 @@
         </encoder>
     </appender>
 
-    <logger name="com.recordcataloguer" level="DEBUG"/>
-    <logger name="org.springframework" level="DEBUG"/>
+    <logger name="com.recordcataloguer" level="INFO"/>
+    <logger name="org.springframework" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
