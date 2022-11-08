@@ -1,82 +1,63 @@
 package com.recordcataloguer.recordcataloguer.http.discogs;
 
 import java.util.ArrayList;
+import java.util.List;
 
-// import com.fasterxml.jackson.databind.ObjectMapper; // version 2.11.1
-// import com.fasterxml.jackson.annotation.JsonProperty; // version 2.11.1
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
 public class DiscogsSearchResponse {
 
-    // import com.fasterxml.jackson.databind.ObjectMapper; // version 2.11.1
-// import com.fasterxml.jackson.annotation.JsonProperty; // version 2.11.1
-/* ObjectMapper om = new ObjectMapper();
-Root root = om.readValue(myJsonString, Root.class); */
+    Pagination pagination;
 
-    /***Add to class
-     *         public Pagination pagination;
-     *         public ArrayList<Result> results;
-     *
-     * And pull classes OUT of public
-     *
-     * Make them private
-     */
-    public class Community{
-        public int want;
-        public int have;
-    }
+    List<Result> results;
+}
 
-    public class Format{
-        public String name;
-        public String qty;
-        public String text;
-        public ArrayList<String> descriptions;
-    }
-
-    public class Pagination{
-        public int page;
-        public int pages;
-        public int per_page;
-        public int items;
-        public Urls urls;
-    }
-
-    public class Result{
-        public String country;
-        public ArrayList<String> genre;
-        public ArrayList<String> format;
-        public ArrayList<Object> style;
-        public int id;
-        public ArrayList<String> label;
-        public String type;
-        public ArrayList<String> barcode;
-        public UserData user_data;
-        public int master_id;
-        public String master_url;
-        public String uri;
-        public String catno;
-        public String title;
-        public String thumb;
-        public String cover_image;
-        public String resource_url;
-        public Community community;
-        public int format_quantity;
-        public ArrayList<Format> formats;
-    }
-
-    public class Root{
-        public Pagination pagination;
-        public ArrayList<Result> results;
-    }
-
-    public class Urls{
-    }
-
-    public class UserData{
-        public boolean in_wantlist;
-        public boolean in_collection;
-    }
-
+@Data
+ class Community{
+    private int want;
+    private int have;
+}
+@Data
+class Format{
+    private String name;
+    private String qty;
+    private String text;
+    private ArrayList<String> descriptions;
+}
+@Data
+class Pagination{
+    private int page;
+    private int pages;
+    private int per_page;
+    private int items;
+}
+@Data
+class Result{
+    private String country;
+    private ArrayList<String> genre;
+    private ArrayList<String> format;
+    private ArrayList<Object> style;
+    private int id;
+    private ArrayList<String> label;
+    private String type;
+    private ArrayList<String> barcode;
+    private int master_id;
+    private String master_url;
+    private String uri;
+    private String catno;
+    private String title;
+    private String thumb;
+    private String cover_image;
+    private String resource_url;
+    private Community community;
+    private int format_quantity;
+    private ArrayList<Format> formats;
 
 }
+
 /***Sample Response
  *
  * {

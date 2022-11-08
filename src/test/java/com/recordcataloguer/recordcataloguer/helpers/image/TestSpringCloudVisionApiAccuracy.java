@@ -9,27 +9,27 @@ import org.springframework.web.servlet.ModelAndView;
 @Slf4j
 public class TestSpringCloudVisionApiAccuracy {
 
-    public static void main(String[] args) throws IOException {
-        imageReaderShouldAccuratelyExtractTextFromAllImages();
-    }
+//    public static void main(String[] args) throws IOException {
+//        imageReaderShouldAccuratelyExtractTextFromAllImages();
+//    }
 
     /***
      * THIS TEST IS ONLY FOR VERIFYING HOW ACCURATE THE GOOGLE API IS FOR EXTRACTING TEXT FROM IMAGES OF VARIOUS
      * IMAGE QUALITIES. SHOULD NOT BE RUN EXCEPT DURING DEVELOPMENT
      * @return
      */
-    public static void imageReaderShouldAccuratelyExtractTextFromAllImages() throws IOException {
-
-        Map<String, String> testImagesMap = initListImagePaths();
-        List<String> maybeCatalogueNumbers = new ArrayList<>();
-        List<String> failedImages = new ArrayList<>();
-        List<String> successfulImages = new ArrayList<>();
-        ImageReader imageReader = new ImageReader();
-        ModelAndView modelAndView = new ModelAndView();
-
-        modelAndView = imageReader.extractTextFromImage("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg");
-        System.out.println(modelAndView);
-    }
+//    public static void imageReaderShouldAccuratelyExtractTextFromAllImages() throws IOException {
+//
+//        Map<String, String> testImagesMap = initListImagePaths();
+//        List<String> maybeCatalogueNumbers = new ArrayList<>();
+//        List<String> failedImages = new ArrayList<>();
+//        List<String> successfulImages = new ArrayList<>();
+//        ImageReader imageReader = new ImageReader();
+//        ModelAndView modelAndView = new ModelAndView();
+//
+//        modelAndView = imageReader.extractTextFromImage("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg");
+//        System.out.println(modelAndView);
+//    }
     /***
      * Only to be used when testing accuracy of Google API
      * @return

@@ -1,6 +1,7 @@
 package com.recordcataloguer.recordcataloguer.helpers.image;
 
 import com.google.cloud.vision.v1.*;
+import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
@@ -12,6 +13,8 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /***
@@ -39,38 +42,27 @@ public class ImageReader {
     @Autowired
     private CloudVisionTemplate cloudVisionTemplate;
 
-    // get text from List/Map of images
-//    public ModelAndView extractTextFromImageList(Map<String, String>)
-
-    // get label from image
-    public ModelAndView extractTextFromImage(String imageUrl) {
+    // get text from image
+    public List<String> extractTextFromImage(String imageUrl) {
         String text =
                 this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
 
-        ModelMap map = new ModelMap();
-        map.addAttribute("text", text);
-        map.addAttribute("imageUrl", imageUrl);
+        List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
 
-        return new ModelAndView("result", map);
+        return catalogueNumbers;
     }
 
     // Get labels from single Image
-    public ModelAndView extractLabelFromImage(String imageUrl) {
+    public List<String> extractLabelFromImage(String imageUrl) {
 
-        File file = new File(imageUrl);
         AnnotateImageResponse response = cloudVisionTemplate.analyzeImage(
                 resourceLoader.getResource(imageUrl)
         );
 
         List<EntityAnnotation> annotations = response.getLabelAnnotationsList();
+        List<String> imageLabels = new ArrayList<>();
 
-        ModelMap map = new ModelMap();
-        map.addAttribute("annotations", annotations);
-        map.addAttribute("image", imageUrl);
-
-        log.info("Result of Spring Vision Image {}", map.get(annotations.get(0)));
-        ModelAndView modelAndView = new ModelAndView("result", map);
-        return new ModelAndView("result", map);
+        return imageLabels;
     }
 
     // get text from PDF
