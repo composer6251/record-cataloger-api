@@ -16,7 +16,7 @@ import java.net.http.HttpResponse;
 @RestController
 @Slf4j
 @CrossOrigin(origins = "http://10.116.244.134") // Allow from app
-public class RecordController {
+public class EbayController {
     @Autowired
     private EbayService ebayService;
 
