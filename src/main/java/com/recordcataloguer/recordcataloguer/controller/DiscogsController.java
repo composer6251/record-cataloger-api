@@ -2,12 +2,15 @@ package com.recordcataloguer.recordcataloguer.controller;
 
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsResultDTO;
+import com.recordcataloguer.recordcataloguer.http.discogs.Result;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,11 +49,35 @@ public class DiscogsController {
     // Or return all results and let user choose?
     // This could be ALOT of results
 
-    @GetMapping("/lookupRecords")
-    public ResponseEntity<List<DiscogsResultDTO>> lookUpRecords(@RequestParam @NonNull String url) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+//    @GetMapping("/lookupRecords")
+//    public ResponseEntity<List<Map<String, Result>>> lookUpRecords(@RequestParam @NonNull String url) {
+//        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+//
+//        return discogsService.getRecordsAsJSON(url);
+//    }
 
-        return discogsService.getRecords(url);
+    @GetMapping(value = "/getRecordsAsThumbnails")
+    public ResponseEntity<List<Result>> getRecordsAsThumbnails(@RequestParam @NonNull String url) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Result> results = discogsService.getRecordsByImageText(url);
+        return new ResponseEntity(results, HttpStatus.OK);
+    }
+
+    @GetMapping(
+            value = "/getRecordThumbnailsByImage",
+            produces = MediaType.IMAGE_GIF_VALUE
+    )
+    public ResponseEntity<List<Result>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Result> results = discogsService.getRecordsByImageText(url);
+        return new ResponseEntity(results, HttpStatus.OK);
+    }
+
+    @GetMapping("/extractTextFromImage")
+    public String extractTextFromImage(@RequestParam @NonNull String url) {
+        log.error("Request received to lookup records from Discogs with imageUrl: {}", url);
+
+        return discogsService.extractTextFromImage(url);
     }
 
     // TODO: Add endpoint for single record lookup

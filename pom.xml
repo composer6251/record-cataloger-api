@@ -100,6 +100,11 @@
 <!--			<artifactId>snakeyaml</artifactId>-->
 <!--			<version>1.33</version>-->
 <!--		</dependency>-->
+<!--		For Image Encoding/Decoding-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

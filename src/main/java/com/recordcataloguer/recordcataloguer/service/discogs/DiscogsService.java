@@ -2,6 +2,7 @@ package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
+import com.recordcataloguer.recordcataloguer.helpers.encode.ImageEncodingHelper;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsResultDTO;
 import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
@@ -13,9 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,25 +32,74 @@ public class DiscogsService {
 
     private final String token = DiscogsTokens.DISCOGS_PERSONAL_ACCESS_TOKEN;
 
+    private static Result copyResultWithEncodedThumb(Result record) {
+        Result resultWithImage =  new Result(record);
+
+        resultWithImage.setEncodedThumb(ImageEncodingHelper.getEncodedImageFromDiscogs(record.getThumb()));
+
+        return resultWithImage;
+    }
+
     // TODO: Encode/Decode image from UI, or just save image in cloud/local and pass url?
     // TODO: Add call to price suggestions endpoint
     // TODO: Call to look up image URL and download it/them
+
+    /***
+     * Extract possible cat numbers
+     * Discogs API for result
+     * Model should only grab the image thumb
+     */
+    // TODO SOME OF THIS WORK IS NO LONGER NEEDED. JUST RETURN THE URL FOR THE THUMB AND INSIDE THE HTML ELEMENT, SET THE "SRC" Property = THUMB URL
+    // TODO: BUT KEEP THE LIST<RESULT> INSTEAD OF THE LIST<MAP<RESULT, STRING>>
+    public List<Result> getRecordsByImageText(String imageUrl) {
+
+        List<Result> discogsSearchResponse = getRecords(imageUrl);
+
+        // Create new object list with encodedThumbs for thumbnails
+//        List<Result> thumbnails = discogsSearchResponse.stream()
+//                .filter(record -> record.getThumb() != null)
+////                .map(DiscogsService::copyResultWithEncodedThumb)
+//                .collect(Collectors.toList());
+
+        return discogsSearchResponse;
+    }
+
+//    public ResponseEntity<List<Map<String, Result>>> getRecordsAsJSON(String imageUrl) {
+//
+//        List<Map<String, Result>> discogsSearchResponse = getRecords(imageUrl);
+//
+//        return ResponseEntity.of(Optional.of(discogsSearchResponse));
+//    }
+
     /*****NOTE: DIFFERENT BARCODES EXIST FOR DIFFERENT RELEASES****/
     /***
      * DiscogsService controller method for getting records by an image
      * @param imageUrl
      * @return ResponseEntity of DiscogsResponse
      */
-    public ResponseEntity<List<DiscogsResultDTO>> getRecords(String imageUrl) {
+//    private List<Map<String, Result>> getRecords(String imageUrl) {
+//
+//        List<String> catalogueNumbers = extractCatalogueNumbersFromImage(imageUrl);
+//
+//        if(catalogueNumbers.isEmpty()) return null;
+//
+//        List<Map<String, Result>> results = getRecordsByCatalogueNumber(catalogueNumbers);
+//        //List<List<DiscogsResultDTO>> discogsSearchResponse = getRecordsByCatalogueNumber(catalogueNumbers);
+//
+//        return results;
+//    }
+    private List<Result> getRecords(String imageUrl) {
 
         List<String> catalogueNumbers = extractCatalogueNumbersFromImage(imageUrl);
 
-        if(catalogueNumbers.isEmpty()) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(catalogueNumbers.isEmpty()) return null;
 
-        List<DiscogsResultDTO> discogsSearchResponse = getRecordsByCatalogueNumber(catalogueNumbers);
+        List<Result> results = getRecordsByCatalogueNumber(catalogueNumbers);
 
-        return ResponseEntity.of(Optional.of(discogsSearchResponse));
+        return results;
     }
+
+
 
     public ResponseEntity<DiscogsResultDTO> getRecord(String imageUrl) {
 
@@ -72,7 +119,14 @@ public class DiscogsService {
      */
     private List<String> extractCatalogueNumbersFromImage(String url){
 
-        List<String> extractedCatalogueNumbers = imageReader.extractTextFromImage(url);
+        List<String> extractedCatalogueNumbers = imageReader.extractCatalogueNumberFromImage(url);
+
+        return extractedCatalogueNumbers;
+    }
+
+    public String extractTextFromImage(String url){
+
+        String extractedCatalogueNumbers = imageReader.extractTextFromImage(url);
 
         return extractedCatalogueNumbers;
     }
@@ -82,108 +136,57 @@ public class DiscogsService {
      * @param catalogueNumbers
      * @return DiscogsSearchResponse
      */
-    private List<DiscogsResultDTO> getRecordsByCatalogueNumber(List<String> catalogueNumbers) {
+    private List<Result> getRecordsByCatalogueNumber(List<String> catalogueNumbers) {
 
-        // ArrayList to hold DiscogsResult objects
-        List<DiscogsResultDTO> discogsResultList = new ArrayList<>();
-        // For each
-            //use catalogue number get Full DiscogsResponse with Pagination Object and List<Results> Objects
-                // If Results is not empty
-                // Filter Results to NOT include
-                // duplicate titles
-                // and empty Result
-                // build buildDtoFromDiscogsSearchResponse
-                // Collect to list, or add to list
-        List<List<DiscogsResultDTO>> uiFormattedResponse = new ArrayList<>();
+        // List of key value pairs. Key = record value = result information
+        List<Result> allFilteredResults = new ArrayList<>();
 
         for (String catalogueNumber : catalogueNumbers) {
+            Map<String, Result> filteredResultMap = new HashMap<>();
+
             DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
-            if(discogsSearchResponse.getResults().isEmpty()) return null;//ResponseEntity<>(HttpStatus.NOT_FOUND);
+            if(discogsSearchResponse.getResults().isEmpty()) continue;
             
             List<Result> results = discogsSearchResponse.getResults();
 
-            List<Result> filteredResults = results.stream()
-                    .filter(Objects::nonNull)
-                    .filter(distinctByKey(Result::getTitle))
-                    .collect(Collectors.toList());
-
-            List<DiscogsResultDTO> discogsResultDTO = discogsSearchResponse.buildDtoFromDiscogsSearchResponse(filteredResults);
-            uiFormattedResponse.add(discogsResultDTO);
+            return results;
         }
 
-        // Look up each catalogue number and add to result set
-        // Todo: Just add the ones that have results? To avoid using a filter later?
-        catalogueNumbers.forEach(catalogueNumber -> discogsResultList
-                .add(discogsClient.getUSDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format)));
-
-
-        // If no results are returned, return 404
-        if(discogsResultList.isEmpty()) return null;
-
-        // For each DiscogsResult, filter out duplicate titles and empty responses
-        // TODO: Add try catch
-        List<DiscogsResultDTO> filteredDiscogsResults = discogsResultList
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(distinctByKey(DiscogsResultDTO::getTitle))
-                .collect(Collectors.toList());
-
-
-//        List<DiscogsResult> filteredResults = discogsSearchResultList.get(0).getResults();
-
-//        List<DiscogsSearchResult> filteredDiscogsResults = discogsSearchResultList.stream()
-//                .filter(result -> result.)
-//                .collect(Collectors.toList());
+        return allFilteredResults;
+    }
+//    private List<Map<String, Result>> getRecordsByCatalogueNumber(List<String> catalogueNumbers) {
 //
-//        List<DiscogsSearchResult> uniqueDiscogsResults = filteredDiscogsResults.stream()
-//                .filter(distinctByKey(result -> result.()))
-//                .collect(Collectors.toList());
+//        // List of key value pairs. Key = record value = result information
+//        List<Map<String, Result>> allFilteredResults = new ArrayList<>();
+//
+//        for (String catalogueNumber : catalogueNumbers) {
+//            Map<String, Result> filteredResultMap = new HashMap<>();
+//
+//            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
+//            if(discogsSearchResponse.getResults().isEmpty()) continue;
+//
+//            List<Result> results = discogsSearchResponse.getResults();
+//            // check if object is not null
+//            // if not, putIfAbsent in map as <title, result>
+//            for (Result result : results) {
+//                if(Objects.nonNull(result)){
+//                    filteredResultMap.putIfAbsent(result.getTitle(), result);
+//                }
+//            }
+//            allFilteredResults.add(filteredResultMap);
+//        }
+//
+//        return allFilteredResults;
+//    }
 
-        for (DiscogsResultDTO result: filteredDiscogsResults) {
-            log.info("result.title {}", result.getTitle());
-
-
-
-        }
-
-        // Todo: Filter
-        // DiscogsSearchResponse.Pagination.items > 0 results is empty
-        // Duplicate name & title combinations
-
-        return filteredDiscogsResults;
-    }
-
-    // Filter distinct by object child prop
-
-    /***
-     *
-     * @param keyExtractor functional interface that accepts a generic, performs the function (apply method) and returns a generic
-     * @param <T>
-     * @return
-     */
-    public static <T> Predicate<T> distinctByKey(
-            Function<? super T, ?> keyExtractor) {
-
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>(); // Map to hold values
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null; //
-    }
-
+    // For each catalogue Number, call getRecordByCatalogueNumber
     private DiscogsResultDTO getRecordByCatalogueNumber(String catalogueNumber) {
 
         DiscogsResultDTO discogsSearchResponse = discogsClient.getUSDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
-
         return discogsSearchResponse;
     }
 
-    //    public ResponseEntity<DiscogsSearchResponse> lookupUpRecordByCatalogueNumber(){
-//
-//        DiscogsSearchResponse discogsSearchResponse =
-//                discogsClient.getUSDiscogsRecordsByCategoryNumber(DiscogsTokens.DISCOGS_PERSONAL_ACCESS_TOKEN, catNo, country);
-//        return ResponseEntity.of(Optional.of(discogsSearchResponse));
-//    }
+    //    private List<Map<String, Result>> filter
 
-    // Make UI consumable object
-
-    // Filter unique artist/title
-    // Return first result?
+    // TODO: Method to lookup by price, and get average? Or lookup by Discogs endpoint for price suggestion.
 }

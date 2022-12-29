@@ -2,9 +2,11 @@ package com.recordcataloguer.recordcataloguer.helpers.encode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 
 /***
@@ -22,8 +24,22 @@ public class ImageEncodingHelper {
     public ImageEncodingHelper() throws IOException {
 
     }
+    public static byte[] getEncodedImageFromDiscogs(String url) {
 
-    public static final String encodeImage(String inputFileName, String outputFileName) throws IOException {
+        byte[] encodedImage = null;
+
+        try {
+            InputStream in = ImageEncodingHelper.class.getResourceAsStream(url);
+            encodedImage = IOUtils.toByteArray(in);
+        } catch (IOException e) {
+            log.error("Unable to encode image for url " + url + " \n with error"+ e.getMessage());
+            e.printStackTrace();
+        }
+        return encodedImage;
+    }
+
+
+    public static String encodeImage(String inputFileName, String outputFileName) throws IOException {
         log.info("Encoding image at location {}", inputFileName);
 
         // Default outputFileName if none
