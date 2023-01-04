@@ -11,14 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface DiscogsClient {
 
     @GetMapping(value = DiscogsUrls.SEARCH_PATH, consumes = "application/json")
-    DiscogsResultDTO getUSDiscogsRecordByCategoryNumber(
-            @RequestParam("catno") String catalogueNumber,
-            @RequestParam("token") String token,
-            @RequestParam("country") String country,
-            @RequestParam("format") String format
-    );
-
-    @GetMapping(value = DiscogsUrls.SEARCH_PATH, consumes = "application/json")
     DiscogsSearchResponse getDiscogsRecordByCategoryNumber(
             @RequestParam("catno") String catalogueNumber,
             @RequestParam("token") String token,

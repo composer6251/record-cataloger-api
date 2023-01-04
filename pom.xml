@@ -94,16 +94,10 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.11.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-<!--		<dependency>-->
-<!--			<groupId>org.yaml</groupId>-->
-<!--			<artifactId>snakeyaml</artifactId>-->
-<!--			<version>1.33</version>-->
-<!--		</dependency>-->
-<!--		For Image Encoding/Decoding-->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<groupId>org.eclipse.collections</groupId>
+			<artifactId>eclipse-collections</artifactId>
+			<version>11.1.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
 		<dependency>

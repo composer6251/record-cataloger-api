@@ -1,7 +1,6 @@
 package com.recordcataloguer.recordcataloguer.controller;
 
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
-import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsResultDTO;
 import com.recordcataloguer.recordcataloguer.http.discogs.Result;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import lombok.NonNull;
@@ -19,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = "http://10.116.244.134") // Allow from Flutter app
+@CrossOrigin(origins = {"http://10.116.244.134", "http://localhost:3000"}) // Allow from Flutter app
 public class DiscogsController {
 
     @Autowired
@@ -49,17 +48,10 @@ public class DiscogsController {
     // Or return all results and let user choose?
     // This could be ALOT of results
 
-//    @GetMapping("/lookupRecords")
-//    public ResponseEntity<List<Map<String, Result>>> lookUpRecords(@RequestParam @NonNull String url) {
-//        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-//
-//        return discogsService.getRecordsAsJSON(url);
-//    }
-
-    @GetMapping(value = "/getRecordsAsThumbnails")
-    public ResponseEntity<List<Result>> getRecordsAsThumbnails(@RequestParam @NonNull String url) {
+    @GetMapping(value = "/getRecords")
+    public ResponseEntity<List<Result>> getRecords(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Result> results = discogsService.getRecordsByImageText(url);
+        List<Result> results = discogsService.getRecords(url);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -69,7 +61,7 @@ public class DiscogsController {
     )
     public ResponseEntity<List<Result>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Result> results = discogsService.getRecordsByImageText(url);
+        List<Result> results = discogsService.getRecords(url);
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
@@ -78,14 +70,6 @@ public class DiscogsController {
         log.error("Request received to lookup records from Discogs with imageUrl: {}", url);
 
         return discogsService.extractTextFromImage(url);
-    }
-
-    // TODO: Add endpoint for single record lookup
-    @GetMapping("/lookupRecord")
-    public ResponseEntity<DiscogsResultDTO> lookUpRecord(@RequestParam @NonNull String url) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-
-        return discogsService.getRecord(url);
     }
 
     @GetMapping("/extractLabelsFromImage")
