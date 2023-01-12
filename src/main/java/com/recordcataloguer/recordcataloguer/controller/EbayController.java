@@ -20,17 +20,17 @@ public class EbayController {
     @Autowired
     private EbayService ebayService;
 
-    @GetMapping("/ebay/auth")
-    public HttpStatus getEbayAuthorization() throws IOException {
-        log.debug("Request received for ebay auth");
-        return ebayService.getEbayAuthorization();
+//    @GetMapping("/ebay/auth")
+//    public HttpStatus getEbayAuthorization() throws IOException {
+//        log.debug("Request received for ebay auth");
+//        return ebayService.getEbayAuthorization();
+//
+//    }
 
-    }
-
-    @GetMapping("/ebay/searchByArtistAndAlbum")
-    public HttpResponse searchByArtistAndAlbum()
-            throws URISyntaxException, IOException, InterruptedException {
-        log.debug("Request received for ebay search by artist and album");
-        return ebayService.searchAlbumByArtistAndNameHttp("CatStevens", "name");
-    }
+//    @GetMapping("/ebay/searchByArtistAndAlbum")
+//    public HttpResponse searchByArtistAndAlbum()
+//            throws URISyntaxException, IOException, InterruptedException {
+//        log.debug("Request received for ebay search by artist and album");
+//        return ebayService.searchAlbumByArtistAndNameHttp("CatStevens", "name");
+//    }
 }

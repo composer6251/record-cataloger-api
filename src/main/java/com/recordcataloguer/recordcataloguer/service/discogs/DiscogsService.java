@@ -95,7 +95,7 @@ public class DiscogsService {
             DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
             if(discogsSearchResponse.getResults().isEmpty()) continue;
 
-            results = discogsSearchResponse.getResults();
+            results.addAll(discogsSearchResponse.getResults());
         }
 
         List<Result> allFilteredResults = results
@@ -103,7 +103,7 @@ public class DiscogsService {
                 .filter(Objects::nonNull)
                 .filter(distinctByKey(Result::getTitle))
                 .collect(Collectors.toList());
-        // TODO: Filter out dupes. Maybe with eclipseCollections?
+
         return allFilteredResults;
     }
 
