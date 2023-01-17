@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.controller;
+package com.recordcataloguer.recordcataloguer.controller.discogs;
 
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.http.discogs.Result;

@@ -1,7 +1,8 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
-import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
+import com.recordcataloguer.recordcataloguer.auth.DiscogsNewTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
+import com.recordcataloguer.recordcataloguer.constants.VinylAlbumConstants;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.http.discogs.Result;
@@ -20,17 +21,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DiscogsService {
 
-    @Autowired
+//    @Autowired
     private DiscogsClient discogsClient;
 
     @Autowired
     private ImageReader imageReader;
 
-    // TODO: Defaulting to "US" to minimize results/duplicates. User should have option to search everywhere on UI
-    private String country = "US";
-    private final String format = "vinyl";
-
-    private final String token = DiscogsTokens.DISCOGS_PERSONAL_ACCESS_TOKEN;
+    private final String token = DiscogsNewTokens.DISCOGS_PERSONAL_ACCESS_TOKEN;
 
     public List<Result> getRecords(String imageUrl) {
         log.info("received request to getRecords");
@@ -40,19 +37,12 @@ public class DiscogsService {
         return discogsSearchResponse;
     }
 
-    // Construct URL with token and pass to UI
-    // Validate URL/Token in UI
-    // Redirect User
-    // Enter User Creds
-    // Then what?
     public String getAuthorizationUrl() {
         log.info("received request to retrieve user authorization URL");
         // Get Token
         Optional<String> url = AuthHelper.getOAuthToken();
         return url.orElse("");
     }
-
-
 
     /*****NOTE: DIFFERENT BARCODES EXIST FOR DIFFERENT RELEASES****/
     /***
@@ -104,7 +94,7 @@ public class DiscogsService {
         // Filter duplicates outside of loop
         for (String catalogueNumber : catalogueNumbers) {
 
-            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
+            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, VinylAlbumConstants.COUNTRY, VinylAlbumConstants.FORMAT);
             if(discogsSearchResponse.getResults().isEmpty()) continue;
             for (Result result: discogsSearchResponse.getResults()) {
                 result.setCatalogNumberForLookup(catalogueNumber);

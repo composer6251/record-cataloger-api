@@ -1,5 +1,6 @@
 package com.recordcataloguer.recordcataloguer.helpers.http;
 
+import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -13,7 +14,7 @@ public class HttpUtil {
     public static final String generateUserAuthorizationUrl(String token) {
         Map<String, String> oauthMap = getOAuthInfoFromDiscogsAuthResponse(token);
         String oauthToken = oauthMap.get("oauth_token");
-        return DISCOGS_BASE_URL + AUTH_PATH + "?oauth_token=" + oauthToken;
+        return REQUEST_TOKEN_URL + "?oauth_token=" + oauthToken;
     }
 
     public static final Map<String, String> getOAuthInfoFromDiscogsAuthResponse(String token) {

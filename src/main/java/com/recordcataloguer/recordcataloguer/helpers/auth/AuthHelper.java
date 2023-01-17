@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -36,10 +38,25 @@ public class AuthHelper {
         return auth;
     }
 
+    public static Map<String, String> getOAuthHeaderMap(){
+        OAuth oAuth = new OAuth();
+
+        Map<String, String> authorizationHeader = new HashMap<>();
+        authorizationHeader.put("OAuth oauth_consumer_key=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("oauth_nonce=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("oauth_signature=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("oauth_signature_method=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("oauth_timestamp=", oAuth.getOauth_consumer_key());
+
+        log.info("authHeader", authorizationHeader);
+
+        return authorizationHeader;
+    }
+
     public static Optional<String> getOAuthToken() {
 
         // Generate/Send Request
-        HttpRequest resultHttp = HttpHelper.generateRequest(DiscogsUrls.DISCOGS_API_BASE_URL + DiscogsUrls.REQUEST_TOKEN, generateOAuthHeader());
+        HttpRequest resultHttp = HttpHelper.generateRequest(DiscogsUrls.REQUEST_TOKEN_URL, generateOAuthHeader());
         // TODO: Raw usage???
         HttpResponse response;
         response = HttpHelper.sendRequest(resultHttp);
@@ -55,7 +72,7 @@ public class AuthHelper {
     public static void getAccessToken() {
         log.info("received request to retrieve user access token");
         // Get Token
-        HttpRequest accessTokenRequest = HttpHelper.generateRequest(DiscogsUrls.DISCOGS_API_BASE_URL + DiscogsUrls.OAUTH_PATH + DiscogsUrls.ACCESS_TOKEN, generateOAuthHeader());
+        HttpRequest accessTokenRequest = HttpHelper.generateRequest(DiscogsUrls.ACCESS_TOKEN_URL, generateOAuthHeader());
         HttpResponse accessTokenResponse = HttpHelper.sendRequest(accessTokenRequest);
         log.info("Access Token Response {}", accessTokenResponse);
     }
