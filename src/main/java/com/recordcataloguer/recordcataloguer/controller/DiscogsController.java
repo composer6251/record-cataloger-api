@@ -55,6 +55,12 @@ public class DiscogsController {
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/authenticate")
+    public void authenticate() {
+        log.debug("Request received to authenticate User with Discogs");
+        discogsService.authenticate();
+    }
+
     @GetMapping(
             value = "/getRecordThumbnailsByImage",
             produces = MediaType.IMAGE_GIF_VALUE

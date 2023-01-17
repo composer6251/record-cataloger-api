@@ -30,6 +30,7 @@ public class Result{
     private int formatQuantity;
     private ArrayList<Object> formats;
     private byte[] encodedThumb;
+    private String catalogNumberForLookup;
 
     /**THIS IS A COPY CONSTRUCTOR FOR USE WHEN NEEDING STREAM TO RETURN OBJECTS WITH DIFFERENT VALUES THAN LOCAL PARAM**/
     public Result(Result resultToCopy) {

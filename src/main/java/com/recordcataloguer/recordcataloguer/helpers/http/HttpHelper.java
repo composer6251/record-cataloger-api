@@ -9,22 +9,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import org.python.core.PyException;
-import org.python.core.PyInteger;
-import org.python.core.PyObject;
-import org.python.util.PythonInterpreter;
 
 @Slf4j
 public class HttpHelper {
 
     private static final HttpClient client = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_1_1)
+            .version(HttpClient.Version.HTTP_2)
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(20))
 //            .proxy(ProxySelector.of(new InetSocketAddress("proxy.example.com", 80)))
-            .authenticator(Authenticator.getDefault())
+//            .authenticator(Authenticator.getDefault())
             .build();
 
     public static HttpRequest generateRequest(String uri, String authorization) {
@@ -45,10 +39,16 @@ public class HttpHelper {
     }
 
     // Send request
-    public static HttpResponse sendRequest(HttpRequest request)
-            throws IOException, InterruptedException {
+    public static HttpResponse sendRequest(HttpRequest request) {
 
-        HttpResponse response = client.send(request, BodyHandlers.ofString());
+        HttpResponse response = null;
+        try {
+            response = client.send(request, BodyHandlers.ofString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return response;
     }
