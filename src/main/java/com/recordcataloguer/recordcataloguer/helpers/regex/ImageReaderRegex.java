@@ -9,6 +9,8 @@ public class ImageReaderRegex {
     public static String regexOne = "[a-zA-Z][-/s][0-9?]";
     public static List<String> extractRecordCatalogueNumber(String text) {
 
+        // TODO: see if catNo have predictable number of prefixes from record label
+        // TODO: filter out catNo with \n in them?????
         String regexAlphaNumeric = "\\b[A-Za-z0-9_]+[\\s|\\-][\\d]+";
         String regexTwo = "[a-zA-Z]+[\\s|\\-][\\d]+";
         Pattern REGEX_ALPHANUMERIC = Pattern.compile(regexAlphaNumeric);

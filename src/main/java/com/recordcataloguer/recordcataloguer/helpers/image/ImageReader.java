@@ -43,13 +43,17 @@ public class ImageReader {
     private CloudVisionTemplate cloudVisionTemplate;
 
     // get text from image
-    public List<String> extractTextFromImage(String imageUrl) {
+    public List<String> extractCatalogueNumberFromImage(String imageUrl) {
         String text =
                 this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
 
         List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
 
         return catalogueNumbers;
+    }
+
+    public String extractTextFromImage(String imageURL) {
+        return this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageURL));
     }
 
     // Get labels from single Image

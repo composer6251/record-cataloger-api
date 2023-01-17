@@ -68,8 +68,8 @@
 //    public static Map<String, String> initListImagePaths(){
 //          Map<String, String> testImagesWithCorrectResult = new HashMap<>();
 //
-//        testImagesWithCorrectResult.put("src/test/resources/images/AR 34001 kind of blurry.jpg", "AR 34001");
-//        testImagesWithCorrectResult.put("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/AR 34001 kind of blurry.jpg", "AR 34001");
+//        testImagesWithCorrectResult.put("src/test/resources/images/AR34001.jpg", "AR 34001");
+//        testImagesWithCorrectResult.put("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/AR34001.jpg", "AR 34001");
 //        testImagesWithCorrectResult.put("src/test/resources/images/20221025_101233.jpg", "AR 34001");
 //        testImagesWithCorrectResult.put("src/test/resources/images/20221025_101247.jpg", "AR 34001");
 //        testImagesWithCorrectResult.put("src/test/resources/images/20221025_101308.jpg", "AR 34001");
