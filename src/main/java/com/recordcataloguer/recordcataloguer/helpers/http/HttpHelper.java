@@ -17,8 +17,6 @@ public class HttpHelper {
             .version(HttpClient.Version.HTTP_2)
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(20))
-//            .proxy(ProxySelector.of(new InetSocketAddress("proxy.example.com", 80)))
-//            .authenticator(Authenticator.getDefault())
             .build();
 
     public static HttpRequest generateRequest(String uri, String authorization) {
@@ -33,7 +31,6 @@ public class HttpHelper {
         }
         catch (URISyntaxException exception) {
             log.error("Error parsing URI while building HttpRequest for URI {}", exception.getMessage());
-//            throw new URISyntaxException("Error parsing URI while building HttpRequest for URI ", exception.getMessage());
         }
         return HttpRequest.newBuilder().build();
     }
@@ -52,5 +49,4 @@ public class HttpHelper {
 
         return response;
     }
-    // Generate request w/body?...etc?
 }

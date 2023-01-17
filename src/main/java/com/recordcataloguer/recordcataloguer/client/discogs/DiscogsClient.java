@@ -1,15 +1,16 @@
 package com.recordcataloguer.recordcataloguer.client.discogs;
 
-import com.recordcataloguer.recordcataloguer.auth.DiscogsNewTokens;
 import com.recordcataloguer.recordcataloguer.config.FeignConfiguration;
+import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
 import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.http.discogs.OAuth;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "discogsService", url = DiscogsUrls.DISCOGS_BASE_URL, configuration = FeignConfiguration.class)
+import java.util.Map;
+
+@FeignClient(name = "discogsService", url = DiscogsUrls.DISCOGS_API_BASE_URL, configuration = FeignConfiguration.class)
 public interface DiscogsClient {
 
     //TODO: TRY TO MIMIC POSTMAN REQUEST
@@ -26,9 +27,9 @@ public interface DiscogsClient {
             @RequestParam("format") String format
     );
 
-    @GetMapping(value = DiscogsUrls.AUTH_PATH, consumes = "application/x-www-form-urlencoded")
+    @GetMapping(value = DiscogsUrls.REQUEST_TOKEN, consumes = "application/x-www-form-urlencoded")
     String requestToken(
-            @RequestHeader("Authorization") OAuth auth,
+            @RequestHeader("Authorization") Map<String, String> auth,
             @RequestHeader("User-Agent") String userAgent
     );
 }

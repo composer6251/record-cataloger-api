@@ -33,21 +33,6 @@ public class DiscogsController {
     @Autowired
     private ImageReader imageReader;
 
-    // Take request for record look up by image
-
-    // Image Reader extracts text
-
-    // ImageReaderUtil filters catalogue numbers
-
-    // If none empty, For each catalogue number, call discogs for result
-
-    // Maybe get barcode?
-
-    // Maybe look up again?
-
-    // Or return all results and let user choose?
-    // This could be ALOT of results
-
     @GetMapping(value = "/getRecords")
     public ResponseEntity<List<Result>> getRecords(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
@@ -56,9 +41,9 @@ public class DiscogsController {
     }
 
     @GetMapping(value = "/authenticate")
-    public void authenticate() {
+    public String authenticate() {
         log.debug("Request received to authenticate User with Discogs");
-        discogsService.authenticate();
+        return discogsService.getAuthorizationUrl();
     }
 
     @GetMapping(

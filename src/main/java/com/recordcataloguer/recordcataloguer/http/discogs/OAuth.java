@@ -21,16 +21,17 @@ public class OAuth {
     private String oauth_callback = "localhost:8080/api-test-page";
     private String oauth_version = "oauth_version=1.0";
 
-    public static final String generateOAuthHeader( ) {
-
-        OAuth oAuth = new OAuth();
-
-        String auth = "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
-                "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
-                "oauth_signature=\"" + oAuth.getOauth_signature() + "\", " +
-                "oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
-
-        return auth;
-    }
+//    public static final String generateOAuthHeader( ) {
+//
+//        OAuth oAuth = new OAuth();
+//
+//        String auth = "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
+//                "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
+//                "oauth_signature=\"" + oAuth.getOauth_signature() + "\", " +
+//                "oauth_signature_method=\"PLAINTEXT\", " +
+//                "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
+////                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
+//
+//        return auth;
+//    }
 }
