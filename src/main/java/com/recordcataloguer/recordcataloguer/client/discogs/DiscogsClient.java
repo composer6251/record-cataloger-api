@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "discogsService", configuration = FeignConfiguration.class)
+@FeignClient(name = "discogsService", url = DiscogsUrls.DISCOGS_API_BASE_URL, configuration = FeignConfiguration.class)
 public interface DiscogsClient {
 
-    @GetMapping(value = DiscogsUrls.DATABASE_SEARCH_URL, consumes = "application/json")
+    @GetMapping(value = DiscogsUrls.DATABASE_API + DiscogsUrls.SEARCH_ENDPOINT, consumes = "application/json")
     DiscogsSearchResponse getDiscogsRecordByCategoryNumber(
             @RequestParam("catno") String catalogueNumber,
             @RequestParam("token") String token,

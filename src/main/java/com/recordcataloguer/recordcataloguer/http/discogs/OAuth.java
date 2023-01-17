@@ -1,21 +1,20 @@
 package com.recordcataloguer.recordcataloguer.http.discogs;
 
-import com.recordcataloguer.recordcataloguer.auth.DiscogsNewTokens;
+import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @EqualsAndHashCode
 @ToString
 public class OAuth {
-    private String oauth_consumer_key = DiscogsNewTokens.DISCOGS_CONSUMER_KEY;
+    private String oauth_consumer_key = DiscogsTokens.DISCOGS_CONSUMER_KEY;
     private String oauth_nonce = UUID.randomUUID().toString();
-    private String oauth_signature = DiscogsNewTokens.DISCOGS_CONSUMER_SECRET +"%26";
+    private String oauth_signature = DiscogsTokens.DISCOGS_CONSUMER_SECRET +"%26";
     private String oauth_signature_method = "PLAINTEXT";
     private long oauth_timestamp = Instant.now().toEpochMilli();
     private String oauth_callback = "localhost:8080/api-test-page";
