@@ -12,9 +12,10 @@ import static com.recordcataloguer.recordcataloguer.constants.DiscogsUrls.*;
 public class HttpUtil {
 
     public static final String generateUserAuthorizationUrl(String token) {
-        Map<String, String> oauthMap = getOAuthInfoFromDiscogsAuthResponse(token);
-        String oauthToken = oauthMap.get("oauth_token");
-        return REQUEST_TOKEN_URL + "?oauth_token=" + oauthToken;
+        //TODO: UNCOMMENT FOR HTTPHELPER PATH INSTEAD OF FEIGN. REFACTOR THOUGH.....
+//        Map<String, String> oauthMap = getOAuthInfoFromDiscogsAuthResponse(token);
+//        String oauthToken = oauthMap.get("oauth_token");
+        return AUTHORIZATION_URL + "?oauth_token=" + token;
     }
 
     public static final Map<String, String> getOAuthInfoFromDiscogsAuthResponse(String token) {

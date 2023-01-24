@@ -40,6 +40,13 @@ public class DiscogsController {
         return new ResponseEntity(results, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/getAllRecords")
+    public ResponseEntity<List<String>> getAllRecords() {
+
+        List<Result> results = discogsService.getAllDiscogsCatalogNumbers();
+        return new ResponseEntity(results, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/authenticate")
     public String authenticate() {
         log.debug("Request received to authenticate User with Discogs");

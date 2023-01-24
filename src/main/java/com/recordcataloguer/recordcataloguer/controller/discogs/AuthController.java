@@ -19,4 +19,16 @@ public class AuthController {
         log.debug("Request received to authenticate User with Discogs");
         return authService.getAuthorizationUrlFeign();
     }
+
+    @GetMapping(value = "/get-access-token")
+    public String getAccessToken() {
+        log.debug("Request received to authenticate User with Discogs");
+        return authService.getAccessTokenFeign();
+    }
+
+    @GetMapping(value = "/verify-user-identity")
+    public String verifyUserIdentity() {
+        log.debug("Request received to authenticate User with Discogs");
+        return authService.verifyIdentity();
+    }
 }

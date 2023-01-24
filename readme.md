@@ -80,3 +80,17 @@ This should take you to the Google cloud console and have your project number/pr
 ####AUTH WITH APP KEY. THIS SHOULD BE CHANGED!!!!
 Check directory Users/<user>/ for a hidden json file such as "....cloud-vision"
 Add spring.cloud.gcp.credentials.location=file:/path/to/file.json to application properties
+
+
+
+### CATALOG NUMBERS
+
+#### BY COUNTRY
+The "R" often stands for "Recordds" and the preceeding letters are the record label name
+Does the "V" also stand for "Vinyl"
+Are they always capital letters? The catnos?
+Start with "ELV002" format since it's the least likely to be a false positive
+US: ELV002 CSS 873 BBBR-115 //  RARE *** B0007580-02 
+UK:
+FRANCE: 884 815-7 | 
+Italy: CDL 337

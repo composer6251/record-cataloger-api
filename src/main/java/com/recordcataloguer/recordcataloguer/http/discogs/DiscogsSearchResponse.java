@@ -3,6 +3,7 @@ package com.recordcataloguer.recordcataloguer.http.discogs;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,8 +11,10 @@ import lombok.Data;
 @Builder
 public class DiscogsSearchResponse {
 
+    @JsonProperty("Pagination")
     Pagination pagination;
 
+    @JsonProperty("results")
     List<Result> results;
 
     public List<DiscogsResultDTO> buildDtoFromDiscogsSearchResponse(List<Result> results){

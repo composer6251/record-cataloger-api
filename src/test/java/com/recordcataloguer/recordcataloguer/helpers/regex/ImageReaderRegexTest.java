@@ -1,5 +1,6 @@
 package com.recordcataloguer.recordcataloguer.helpers.regex;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,6 +12,12 @@ public class ImageReaderRegexTest {
 
     @Test
     public void imageReaderRegexShouldFindNumber() {
+
+        // TODO: Find a better way to do this
+        String data = "/Albert-King-New-Orleans-Heat/release/9282862";
+        StringBuilder dataWithEnd = new StringBuilder("/Albert-King-New-Orleans-Heat/release/9282862");
+        dataWithEnd = dataWithEnd.append("EnD");
+        String dataYouWant = StringUtils.substringBetween(dataWithEnd.toString(), "release/", "EnD");
         String regexAlphaSpaceExplained =
                 "\b" + // Where a word starts or ends
                 "[a-zA-Z]+" + // Any number of uppercase or lowercase letters

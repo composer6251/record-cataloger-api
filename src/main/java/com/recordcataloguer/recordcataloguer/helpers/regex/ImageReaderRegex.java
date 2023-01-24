@@ -1,12 +1,21 @@
 package com.recordcataloguer.recordcataloguer.helpers.regex;
 
+import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONUtil;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class ImageReaderRegex {
     public static String regexOne = "[a-zA-Z][-/s][0-9?]";
+
+    public static String releaseNumberRegex = "\\d{3,}$";
+    String dataYouWant = StringUtils.substringBetween("/Albert-King-New-Orleans-Heat/release/9282862", "release/");
+
     public static List<String> extractRecordCatalogueNumber(String text) {
 
         // TODO: see if catNo have predictable number of prefixes from record label
