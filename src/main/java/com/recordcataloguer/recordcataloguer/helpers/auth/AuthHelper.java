@@ -3,7 +3,7 @@ package com.recordcataloguer.recordcataloguer.helpers.auth;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
 import com.recordcataloguer.recordcataloguer.helpers.http.HttpHelper;
 import com.recordcataloguer.recordcataloguer.helpers.http.HttpUtil;
-import com.recordcataloguer.recordcataloguer.http.discogs.OAuth;
+import com.recordcataloguer.recordcataloguer.dto.discogs.OAuth;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpRequest;

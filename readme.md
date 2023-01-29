@@ -12,7 +12,7 @@
 
 ###Browse API
 ###Endpoints:
-####NOTE: Response results maybe be limited within the eBay development sandbox. May need to use production URL(https://api.ebay.com....)
+####NOTE: Response albums maybe be limited within the eBay development sandbox. May need to use production URL(https://api.ebay.com....)
 ###search
 url: https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search?q=Cat%20Stevens
 
@@ -58,7 +58,7 @@ Try tess4j?
     #### Can I find a dependable barcode?
 
 ###Or
-    #### Just grab first result object and present to user. Is this dependable? Need to test
+    #### Just grab first album object and present to user. Is this dependable? Need to test
     #### Filter duplicate artists/title
     #### Present options to user and let them select or manual lookup
 

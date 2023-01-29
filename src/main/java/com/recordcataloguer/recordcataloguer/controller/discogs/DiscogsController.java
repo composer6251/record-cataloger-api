@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
-import com.recordcataloguer.recordcataloguer.http.discogs.Result;
+import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -34,17 +34,17 @@ public class DiscogsController {
     private ImageReader imageReader;
 
     @GetMapping(value = "/getRecords")
-    public ResponseEntity<List<Result>> getRecords(@RequestParam @NonNull String url) {
+    public ResponseEntity<List<Album>> getRecords(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Result> results = discogsService.getRecords(url);
-        return new ResponseEntity(results, HttpStatus.OK);
+        List<Album> albums = discogsService.getRecords(url);
+        return new ResponseEntity(albums, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getAllRecords")
     public ResponseEntity<List<String>> getAllRecords() {
 
-        List<Result> results = discogsService.getAllDiscogsCatalogNumbers();
-        return new ResponseEntity(results, HttpStatus.OK);
+        List<Album> albums = discogsService.getAllDiscogsCatalogNumbers();
+        return new ResponseEntity(albums, HttpStatus.OK);
     }
 
     @GetMapping(value = "/authenticate")
@@ -57,10 +57,10 @@ public class DiscogsController {
             value = "/getRecordThumbnailsByImage",
             produces = MediaType.IMAGE_GIF_VALUE
     )
-    public ResponseEntity<List<Result>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
+    public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Result> results = discogsService.getRecords(url);
-        return new ResponseEntity(results, HttpStatus.OK);
+        List<Album> albums = discogsService.getRecords(url);
+        return new ResponseEntity(albums, HttpStatus.OK);
     }
 
     @GetMapping("/extractTextFromImage")

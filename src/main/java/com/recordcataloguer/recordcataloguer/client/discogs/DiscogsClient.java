@@ -2,13 +2,10 @@ package com.recordcataloguer.recordcataloguer.client.discogs;
 
 import com.recordcataloguer.recordcataloguer.config.FeignConfiguration;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
-import com.recordcataloguer.recordcataloguer.http.discogs.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.http.discogs.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.http.discogs.PriceSuggestionsResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @FeignClient(name = "discogsService", url = DiscogsUrls.DISCOGS_API_BASE_URL, configuration = FeignConfiguration.class)
 public interface DiscogsClient {

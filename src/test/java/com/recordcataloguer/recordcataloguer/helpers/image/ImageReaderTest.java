@@ -13,12 +13,12 @@ public class ImageReaderTest {
     @Autowired
     ResourceLoader resourceLoader;
 
-    @Test
-    public void resourceLoaderShouldFindFile() {
-
-        Resource resource = resourceLoader.getResource("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg");
-        System.out.println(resource);
-    }
+//    @Test
+//    public void resourceLoaderShouldFindFile() {
+//
+//        Resource resource = resourceLoader.getResource("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg");
+//        System.out.println(resource);
+//    }
 
     // Invalid input to detectText(String filePath)
 

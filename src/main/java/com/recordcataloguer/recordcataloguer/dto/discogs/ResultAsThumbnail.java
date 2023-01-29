@@ -1,8 +1,6 @@
-package com.recordcataloguer.recordcataloguer.http.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs;
 
 import lombok.Data;
-
-import java.util.ArrayList;
 
 @Data
 public class ResultAsThumbnail {

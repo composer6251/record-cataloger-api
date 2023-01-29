@@ -1,7 +1,6 @@
 package com.recordcataloguer.recordcataloguer.helpers.regex;
 
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

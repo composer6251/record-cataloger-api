@@ -1,16 +1,18 @@
-package com.recordcataloguer.recordcataloguer.http.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 
 @Builder
 @Data
 @AllArgsConstructor
-public class Result{
+@NoArgsConstructor
+public class Album {
     @JsonProperty("title")
     private String title;
     @JsonProperty("country")
@@ -55,26 +57,26 @@ public class Result{
     private double albumGoodValue;
 
     /**THIS IS A COPY CONSTRUCTOR FOR USE WHEN NEEDING STREAM TO RETURN OBJECTS WITH DIFFERENT VALUES THAN LOCAL PARAM**/
-    public Result(Result resultToCopy) {
-        this.title = resultToCopy.title;
-        this.country = resultToCopy.country;
-        this.genre = resultToCopy.genre;
-        this.format = resultToCopy.format;
-        this.style = resultToCopy.style;
-        this.id = resultToCopy.id;
-        this.label = resultToCopy.label;
-        this.type = resultToCopy.type;
-        this.barcode = resultToCopy.barcode;
-        this.masterId = resultToCopy.masterId;
-        this.masterUrl = resultToCopy.masterUrl;
-        this.uri = resultToCopy.uri;
-        this.catno = resultToCopy.catno;
-        this.thumb = resultToCopy.thumb;
-        this.coverImage = resultToCopy.coverImage;
-        this.resourceUrl = resultToCopy.resourceUrl;
-        this.community = resultToCopy.community;
-        this.formatQuantity = resultToCopy.formatQuantity;
-        this.formats = resultToCopy.formats;
-        this.encodedThumb = resultToCopy.encodedThumb;
+    public Album(Album albumToCopy) {
+        this.title = albumToCopy.title;
+        this.country = albumToCopy.country;
+        this.genre = albumToCopy.genre;
+        this.format = albumToCopy.format;
+        this.style = albumToCopy.style;
+        this.id = albumToCopy.id;
+        this.label = albumToCopy.label;
+        this.type = albumToCopy.type;
+        this.barcode = albumToCopy.barcode;
+        this.masterId = albumToCopy.masterId;
+        this.masterUrl = albumToCopy.masterUrl;
+        this.uri = albumToCopy.uri;
+        this.catno = albumToCopy.catno;
+        this.thumb = albumToCopy.thumb;
+        this.coverImage = albumToCopy.coverImage;
+        this.resourceUrl = albumToCopy.resourceUrl;
+        this.community = albumToCopy.community;
+        this.formatQuantity = albumToCopy.formatQuantity;
+        this.formats = albumToCopy.formats;
+        this.encodedThumb = albumToCopy.encodedThumb;
     }
 }

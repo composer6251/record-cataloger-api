@@ -1,6 +1,6 @@
 package com.recordcataloguer.recordcataloguer.helpers.auth;
 
-import com.recordcataloguer.recordcataloguer.http.discogs.OAuth;
+import com.recordcataloguer.recordcataloguer.dto.discogs.OAuth;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
