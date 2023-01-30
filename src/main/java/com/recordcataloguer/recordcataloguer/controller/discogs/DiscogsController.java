@@ -1,5 +1,6 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
+import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
@@ -40,10 +41,17 @@ public class DiscogsController {
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/getRecordsNew")
+    public ResponseEntity<List<Album>> getRecordsNew(@RequestParam @NonNull String url) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Album> albums = discogsService.getRecords(url);
+        return new ResponseEntity(albums, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/getAllRecords")
     public ResponseEntity<List<String>> getAllRecords() {
 
-        List<Album> albums = discogsService.getAllDiscogsCatalogNumbers();
+        List<AlbumEntity> albums = discogsService.getAllDiscogsCatalogNumbers();
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 

@@ -16,6 +16,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /***
  * Google Responses
@@ -48,6 +49,15 @@ public class ImageReader {
                 this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
 
         List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
+
+        return catalogueNumbers;
+    }
+
+    public List<String> extractCatalogueNumberFromImageAsMap(String imageUrl) {
+        String text =
+                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
+
+        List<String> catalogueNumbers = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
 
         return catalogueNumbers;
     }

@@ -1,6 +1,6 @@
 package com.recordcataloguer.recordcataloguer.entity;
 
-import com.recordcataloguer.recordcataloguer.dto.discogs.Community;
+import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +20,8 @@ public class AlbumEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
+    @Column(name = "discogs_release_id")
+    private int discogsReleaseId;
     @Column(name = "title")
     private String title;
     @Column(name = "country")
@@ -34,7 +36,8 @@ public class AlbumEntity {
     private ArrayList<String> label;
     @Column(name = "type")
     private String type;
-//    private ArrayList<String> barcode;
+    @Column(name = "barcode")
+    private ArrayList<String> barcode;
     @Column(name = "master_id")
     private int masterId;
     @Column(name = "master_url")
@@ -49,7 +52,34 @@ public class AlbumEntity {
     private String coverImage;
     @Column(name = "resource_url")
     private String resourceUrl;
-//    @Embedded
-//    private Community community;
+    @Column(name = "community_want")
+    private int communityWant;
+    @Column(name = "community_have")
+    private int communityHave;
+    @Column(name = "format_quantity")
     private int formatQuantity;
+
+    public static AlbumEntity buildAlbumEntityFromAlbum(Album album) {
+        return AlbumEntity.builder()
+                .catno(album.getCatno())
+                .title(album.getTitle())
+                .country(album.getCountry())
+                .discogsReleaseId(album.getId())
+                .genre(album.getGenre())
+                .format(album.getFormat())
+                .style(album.getStyle())
+                .label(album.getLabel())
+                .type(album.getType())
+                .barcode(album.getBarcode())
+                .masterId(album.getMasterId())
+                .masterUrl(album.getMasterUrl())
+                .uri(album.getUri())
+                .thumb(album.getThumb())
+                .coverImage(album.getCoverImage())
+                .resourceUrl(album.getResourceUrl())
+                .formatQuantity(album.getFormatQuantity())
+                .communityWant(album.getCommunity().getWant())
+                .communityHave(album.getCommunity().getHave())
+                .build();
+    }
 }

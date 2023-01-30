@@ -1,9 +1,9 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
-import com.recordcataloguer.recordcataloguer.auth.DatabaseCreds;
 import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
-import com.recordcataloguer.recordcataloguer.helpers.DatabaseHelper;
+import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
@@ -12,13 +12,15 @@ import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse
 import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -85,7 +87,16 @@ public class DiscogsService {
      */
     private List<Album> getRecordsByImageText(String imageUrl) {
 
-        List<String> catalogueNumbers = extractCatalogueNumbersFromImage(imageUrl);
+        List<String> catalogueNumbers = new ArrayList<>();
+//        List<String> catNoMap = new HashMap<>();
+        boolean testingNewWay = true;
+        if(testingNewWay) {
+            catalogueNumbers = extractCatalogueNumbersFromImageAsMap(imageUrl);
+        }
+        else {
+            catalogueNumbers = extractCatalogueNumbersFromImage(imageUrl);
+
+        }
 
         if(catalogueNumbers.isEmpty()) return null;
 
@@ -102,6 +113,13 @@ public class DiscogsService {
     private List<String> extractCatalogueNumbersFromImage(String url){
 
         List<String> extractedCatalogueNumbers = imageReader.extractCatalogueNumberFromImage(url);
+
+        return extractedCatalogueNumbers;
+    }
+
+    private List<String> extractCatalogueNumbersFromImageAsMap(String url){
+
+        List<String> extractedCatalogueNumbers = imageReader.extractCatalogueNumberFromImageAsMap(url);
 
         return extractedCatalogueNumbers;
     }
@@ -158,8 +176,13 @@ public class DiscogsService {
         return resultsWithPriceSuggestions;
     }
 
+    public void insertRecordIntoDB(AlbumEntity album, Session session) {
+
+
+    }
+
     @SneakyThrows
-    public List<Album> getAllDiscogsCatalogNumbers() {
+    public List<AlbumEntity> getAllDiscogsCatalogNumbers() {
 
         // Get a list of all discogs catalogue numbers
 
@@ -170,13 +193,11 @@ public class DiscogsService {
         // "abc 123"
         // "Captal records 9000
         // Maybe extract label and use it? Need list of labels?
-
-        // Check for Name?
-
-        // More work for user? Have them start with definitive catnos?
-
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactoryXml();
+        Session session = sessionFactory.openSession();
         DiscogsSearchResponse response = discogsClient.getAllDiscogsCatalogNumbers(token, format, 100);
-        List<Album> resultsToReturn = new ArrayList<>();
+        List<AlbumEntity> resultsToReturn = new ArrayList<>();
+        AtomicReference<Long> failedTransactions = new AtomicReference<>(0L);
 
         int i = 1;
         while(response.getPagination() != null && response.getPagination().getUrls().containsKey("next") && i < 101) {
@@ -186,27 +207,34 @@ public class DiscogsService {
             }
             DiscogsSearchResponse resp = discogsClient.getNextDiscogsSearchResultPage(token, format, 100, i++);
 
-            List<Album> allFilteredAlbums = resp.getAlbums()
+            List<AlbumEntity> allFilteredAlbums = resp.getAlbums()
                     .stream()
                     .filter(r -> !Objects.equals(r.getCatno(), ""))
-                    .map(result -> Album.builder().catno(result.getCatno()).country(result.getCountry()).title(result.getTitle()).build())
+                    .map(album -> AlbumEntity.buildAlbumEntityFromAlbum(album))
                     .collect(Collectors.toList());
 
+//            session.beginTransaction();
+//
+//            resultsToReturn.forEach(r -> {
+//                try {
+//                    session.persist(r);
+//
+//                } catch (Exception exception) {
+//                    log.error("Error inserting record {} {} \n {}", r.getCatno(), r.getTitle(), exception.getMessage());
+//                    failedTransactions.getAndSet(failedTransactions.get() + 1);
+//
+//                }
+//            });
+//            session.getTransaction().commit();
+////            session.flush();
             resultsToReturn.addAll(allFilteredAlbums);
-            log.info("resultsToReturn");
+            log.info("resultsToReturn size {}", resultsToReturn.size());
 
         }
-        // TODO: Save to DB as Entity
-//        resultsToReturn.forEach(result -> System.out.println(result.getCountry() + " " + result.getCatno() + " " + result.getTitle()));
-        // Save to DB temporarily
-        Connection connection = DatabaseHelper.createConnection(DatabaseCreds.DB_USERNAME, DatabaseCreds.DB_PASSWORD);
-//        resultsToReturn.forEach(r -> connection.commit(r));
+        log.info("Number of failed Record inserts {} and total results {}", failedTransactions, resultsToReturn);
+        session.close();
 
         return resultsToReturn;
-    }
-
-    public void testHibernateInsert() {
-
     }
 
     public List<Album> getNextPageOfResults(DiscogsSearchResponse response) {

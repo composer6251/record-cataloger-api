@@ -15,7 +15,8 @@ public interface DiscogsClient {
             @RequestParam("catno") String catalogueNumber,
             @RequestParam("token") String token,
             @RequestParam("country") String country,
-            @RequestParam("format") String format
+            @RequestParam("format") String format,
+            @RequestParam("title") String title
     );
 
     @GetMapping(value = DiscogsUrls.DATABASE_API + DiscogsUrls.SEARCH_ENDPOINT, consumes = "application/json")
