@@ -1,6 +1,7 @@
 package com.recordcataloguer.recordcataloguer.helpers.image;
 
 import com.google.cloud.vision.v1.*;
+import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,13 +54,13 @@ public class ImageReader {
         return catalogueNumbers;
     }
 
-    public List<String> extractCatalogueNumberFromImageAsMap(String imageUrl) {
+    public List<DiscogsSearchAlbumRequest> filterText(String imageUrl) {
         String text =
                 this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
 
-        List<String> catalogueNumbers = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
+        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
 
-        return catalogueNumbers;
+        return searchAlbumRequests;
     }
 
     public String extractTextFromImage(String imageURL) {

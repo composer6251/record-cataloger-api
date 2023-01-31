@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VisionFilteredText {
+public class DiscogsSearchAlbumRequest {
 
     private String catNo;
     private String title;
-    private String confidenceLevel;
+    private String originalString;
+    private int confidenceLevel;
 }

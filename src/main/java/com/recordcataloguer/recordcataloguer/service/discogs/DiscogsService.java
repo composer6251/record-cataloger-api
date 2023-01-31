@@ -3,6 +3,7 @@ package com.recordcataloguer.recordcataloguer.service.discogs;
 import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
@@ -87,20 +88,20 @@ public class DiscogsService {
      */
     private List<Album> getRecordsByImageText(String imageUrl) {
 
-        List<String> catalogueNumbers = new ArrayList<>();
+        List<DiscogsSearchAlbumRequest> searchAlbumRequests = new ArrayList<>();
 //        List<String> catNoMap = new HashMap<>();
         boolean testingNewWay = true;
         if(testingNewWay) {
-            catalogueNumbers = extractCatalogueNumbersFromImageAsMap(imageUrl);
+            searchAlbumRequests = extractCatalogueNumbersFromImageAsMap(imageUrl);
         }
         else {
-            catalogueNumbers = extractCatalogueNumbersFromImage(imageUrl);
+//            searchAlbumRequests = extractCatalogueNumbersFromImage(imageUrl);
 
         }
 
-        if(catalogueNumbers.isEmpty()) return null;
+        if(searchAlbumRequests.isEmpty()) return null;
 
-        List<Album> albums = getRecordsByCatalogueNumber(catalogueNumbers);
+        List<Album> albums = getRecordsBySearchRequest(searchAlbumRequests);
 
         return albums;
     }
@@ -117,11 +118,11 @@ public class DiscogsService {
         return extractedCatalogueNumbers;
     }
 
-    private List<String> extractCatalogueNumbersFromImageAsMap(String url){
+    private List<DiscogsSearchAlbumRequest> extractCatalogueNumbersFromImageAsMap(String url){
 
-        List<String> extractedCatalogueNumbers = imageReader.extractCatalogueNumberFromImageAsMap(url);
+        List<DiscogsSearchAlbumRequest> searchAlbumRequests = imageReader.filterText(url);
 
-        return extractedCatalogueNumbers;
+        return searchAlbumRequests;
     }
 
     public String extractTextFromImage(String url){
@@ -142,8 +143,11 @@ public class DiscogsService {
 
         for (String catalogueNumber : catalogueNumbers) {
 
-            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format);
+            DiscogsSearchResponse discogsSearchResponse =
+                    discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format, "");
+
             if(discogsSearchResponse.getAlbums().isEmpty()) continue;
+
             for (Album album : discogsSearchResponse.getAlbums()) {
                 album.setCatalogNumberForLookup(catalogueNumber);
             }
@@ -176,9 +180,27 @@ public class DiscogsService {
         return resultsWithPriceSuggestions;
     }
 
-    public void insertRecordIntoDB(AlbumEntity album, Session session) {
+    private List<Album> getRecordsBySearchRequest(List<DiscogsSearchAlbumRequest> albumRequests) {
 
+        List<Album> albums = new ArrayList<>();
 
+        for (DiscogsSearchAlbumRequest albumRequest : albumRequests) {
+
+            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(albumRequest.getCatNo(), token, country, format, "");
+            if(discogsSearchResponse.getAlbums().isEmpty()) continue;
+            for (Album album : discogsSearchResponse.getAlbums()) {
+                album.setCatalogNumberForLookup(albumRequest.getCatNo());
+            }
+            albums.addAll(discogsSearchResponse.getAlbums());
+        }
+
+        List<Album> allFilteredAlbums = albums
+                .stream()
+                .filter(Objects::nonNull)
+                .filter(distinctByKey(Album::getTitle))
+                .collect(Collectors.toList());
+
+        return allFilteredAlbums;
     }
 
     @SneakyThrows
