@@ -133,65 +133,7 @@ public class ImageReaderRegex {
         return albumsToSearch;
     }
 
-
-    /** TEST DATA VISION TEXTS*
-     * Actual values:
-     *
-     * 9
-     * PE 33192
-     * CHR 1235
-     * 2MS 2024
-     * 25386
-     * KE 33290
-     * Z. Z. HILL
-     * TIPS 9349
-     * ** AA-1099
-     * 5120922
-     * 0209
-     * UA-LA974-H
-     * AROMATO
-     * MCA-5132
-     * 7599-75386-1
-     * AHLI-4247
-     * POCO CANTAMOS
-     * ECMASTER
-     * POCO
-     * ATI ANTIC 7 80148-1
-     * MCA-5288
-     * RY COODER BLUE CITY ORIGINAL MOTION PICTURE SOUNDTRACK
-     * MICHAEL MURPHEY BLUE SKY NIGHT THUNDER
-     * poco
-     * THE MOTHERS OF INVENTION UNCLE MEAT / 2024
-     * ●
-     * LEGEND
-     * DELIVERIN'
-     * THE DIRT BAND
-     * COZZHEAD OVER HEELS.
-     * POCO ROSE OF CMARRON
-     * POCO
-     * UNDER THE GUN
-     * ●
-     * BLACK ON-BLACK WAYLON
-     * RORY GALLAGHER/TOP PRIORITY
-     * THE JESS RODEN BAND
-     * POCO
-     * KEEP YOUR HAT ON
-     * AN AMERICAN DREAM
-     * YMAMODATA
-     * POCO COWBOYS AND ENGLISHMEN
-     * WARNER BROS. RECORDS INC. PRINTED IN USA
-     * CHRYSALIS RECORDS PRINTED IN U.S.A.
-     * BIZARRE
-     * UNITED ARTISTS
-     * EPIC STEREO
-     * 197A IN AND RECORD
-     * EPIC STEREO X598
-     * EPIC STERE
-     * STEREO
-     * **/
-
-
-    private static List<String> getTextForIndividualAlbums(String visionResponse) {
+    public static List<String> getTextForIndividualAlbums(String visionResponse) {
         String[] textForIndividualAlbums = visionResponse.split("\n");
 
         return Arrays.stream(textForIndividualAlbums).toList();

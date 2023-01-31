@@ -5,7 +5,9 @@ import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
+import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
+import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
@@ -13,6 +15,7 @@ import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse
 import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,21 +90,23 @@ public class DiscogsService {
      * @return ResponseEntity of DiscogsResponse
      */
     private List<Album> getRecordsByImageText(String imageUrl) {
+        // Get image text
+        String extractedText = extractTextFromImage(imageUrl);
 
-        List<DiscogsSearchAlbumRequest> searchAlbumRequests = new ArrayList<>();
-//        List<String> catNoMap = new HashMap<>();
-        boolean testingNewWay = true;
-        if(testingNewWay) {
-            searchAlbumRequests = extractCatalogueNumbersFromImageAsMap(imageUrl);
-        }
-        else {
-//            searchAlbumRequests = extractCatalogueNumbersFromImage(imageUrl);
-
-        }
-
-        if(searchAlbumRequests.isEmpty()) return null;
+        if(extractedText.isEmpty()) return null;
+        // split extractedText into Individual strings
+        List<String> individualAlbumsTexts = ImageReaderRegex.getTextForIndividualAlbums(extractedText);
+        // Create requests for catalogNumber
+        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.filterExtractedTextToBuildRequest(individualAlbumsTexts);
 
         List<Album> albums = getRecordsBySearchRequest(searchAlbumRequests);
+
+
+        // LookUp discogsSearchResult
+
+        // DiscogsServiceHelper.validate(results, album
+
+
 
         return albums;
     }
@@ -118,12 +123,15 @@ public class DiscogsService {
         return extractedCatalogueNumbers;
     }
 
-    private List<DiscogsSearchAlbumRequest> extractCatalogueNumbersFromImageAsMap(String url){
-
-        List<DiscogsSearchAlbumRequest> searchAlbumRequests = imageReader.filterText(url);
-
-        return searchAlbumRequests;
-    }
+//    private List<DiscogsSearchAlbumRequest> extractCatalogueNumbersFromImageAsMap(String url){
+//
+////        List<DiscogsSearchAlbumRequest> searchAlbumRequests = imageReader.filterText(url);
+//        String extractedText = imageReader.filterText(url);
+//        List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
+//
+//
+//        return searchAlbumRequests;
+//    }
 
     public String extractTextFromImage(String url){
 
@@ -185,22 +193,29 @@ public class DiscogsService {
         List<Album> albums = new ArrayList<>();
 
         for (DiscogsSearchAlbumRequest albumRequest : albumRequests) {
+            String catNoOrTitle = "";
+            //If no catNo but we have title, send title
+            if(StringUtils.isBlank(albumRequest.getCatNo()) && !StringUtils.isBlank(albumRequest.getTitle())) {
+                catNoOrTitle = albumRequest.getTitle();
+            }
+            else {
+                catNoOrTitle = albumRequest.getCatNo();
+            }
+            // if request all props = then we should have the catNo
+            // if request.catNo == null, is request.title alphanumeric? send request.title as catNo param Or add regex with multiple dashes?
+            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catNoOrTitle, token, country, format, "");
 
-            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(albumRequest.getCatNo(), token, country, format, "");
             if(discogsSearchResponse.getAlbums().isEmpty()) continue;
+
+            // Sets property used to determine what used for lookup, NOT what was in the result
             for (Album album : discogsSearchResponse.getAlbums()) {
                 album.setCatalogNumberForLookup(albumRequest.getCatNo());
             }
-            albums.addAll(discogsSearchResponse.getAlbums());
+
+            List<Album> validatedAlbums = DiscogsServiceHelper.discogsSearchAccuracyValidator(discogsSearchResponse.getAlbums(), albumRequest, albumRequests);
+            albums.addAll(validatedAlbums);
         }
-
-        List<Album> allFilteredAlbums = albums
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(distinctByKey(Album::getTitle))
-                .collect(Collectors.toList());
-
-        return allFilteredAlbums;
+        return albums;
     }
 
     @SneakyThrows

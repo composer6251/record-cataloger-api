@@ -54,14 +54,14 @@ public class ImageReader {
         return catalogueNumbers;
     }
 
-    public List<DiscogsSearchAlbumRequest> filterText(String imageUrl) {
-        String text =
-                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
-
-        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
-
-        return searchAlbumRequests;
-    }
+//    public String filterText(String imageUrl) {
+//        String text =
+//                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
+//
+////        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
+//
+//        return text;
+//    }
 
     public String extractTextFromImage(String imageURL) {
         return this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageURL));

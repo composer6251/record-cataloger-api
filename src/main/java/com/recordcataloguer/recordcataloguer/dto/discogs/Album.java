@@ -55,6 +55,7 @@ public class Album {
     private String catalogNumberForLookup;
     private double albumMintPlusValue;
     private double albumGoodValue;
+    private boolean foundByCatNo = false;
 
     /**THIS IS A COPY CONSTRUCTOR FOR USE WHEN NEEDING STREAM TO RETURN OBJECTS WITH DIFFERENT VALUES THAN LOCAL PARAM**/
     public Album(Album albumToCopy) {

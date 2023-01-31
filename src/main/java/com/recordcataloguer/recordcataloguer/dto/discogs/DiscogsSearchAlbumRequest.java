@@ -1,12 +1,14 @@
 package com.recordcataloguer.recordcataloguer.dto.discogs;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class DiscogsSearchAlbumRequest {
 
     private String catNo;
