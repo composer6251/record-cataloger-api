@@ -15,21 +15,14 @@ import java.util.Optional;
 @Slf4j
 public class AuthHelper {
 
+    private static String accessTokenAuthHeader;
+    private static String userActionAuthHeader;
+
+
     public static final String generateOAuthHeaderForOAuthTokenRequest() {
-
-
+        if(!userActionAuthHeader.isBlank()) return userActionAuthHeader;
 
         OAuth oAuth = new OAuth();
-
-        /***Content-Type: application/x-www-form-urlencoded
-         Authorization:
-             OAuth oauth_consumer_key="your_consumer_key",
-             oauth_nonce="random_string_or_timestamp",
-             oauth_signature="your_consumer_secret&",
-             oauth_signature_method="PLAINTEXT",
-             oauth_timestamp="current_timestamp",
-             oauth_callback="your_callback"
-         User-Agent: some_user_agent**/
 
         String auth = "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
                 "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
@@ -38,25 +31,12 @@ public class AuthHelper {
                 "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
 //                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
-        return auth;
+        userActionAuthHeader = auth;
+        return userActionAuthHeader;
     }
 
     public static final String generateOAuthHeaderForAccessTokenRequest(String oAuthToken, String oAuthTokenSecret) {
-
-
-        /***
-         * Content-Type: application/x-www-form-urlencoded
-         * Authorization:
-         *         OAuth oauth_consumer_key="your_consumer_key",
-         *         oauth_nonce="random_string_or_timestamp",
-         *         oauth_token="oauth_token_received_from_step_2"
-         *         oauth_signature="your_consumer_secret&",
-         *         oauth_signature_method="PLAINTEXT",
-         *         oauth_timestamp="current_timestamp",
-         *         oauth_verifier="users_verifier"
-         * User-Agent: some_user_agent
-         */
-
+        if(!accessTokenAuthHeader.isBlank()) return accessTokenAuthHeader;
 
         OAuth oAuth = new OAuth();
 
@@ -70,10 +50,12 @@ public class AuthHelper {
                 "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
 //                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
-        return auth;
+        accessTokenAuthHeader = auth;
+        return accessTokenAuthHeader;
     }
 
     public static String generateAuthorizationForUserActions(String oAuthToken, String oAuthTokenSecret) {
+
         OAuth oAuth = new OAuth();
 
         String auth =

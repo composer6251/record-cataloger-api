@@ -13,6 +13,7 @@ import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse;
 import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
+import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,12 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.*;
 
 @Service
 @Slf4j
@@ -53,7 +53,7 @@ public class DiscogsService {
         return authHeader;
     }
 
-    public PriceSuggestionResponse getPriceSuggestions(int releaseId) {
+    public PriceSuggestionResponse getPriceSuggestions(int releaseId) throws FeignException {
         log.info("received request to getPriceSuggestions");
 
         String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
@@ -91,47 +91,31 @@ public class DiscogsService {
      */
     private List<Album> getRecordsByImageText(String imageUrl) {
         // Get image text
-        String extractedText = extractTextFromImage(imageUrl);
+        String visionRawText = extractTextFromImage(imageUrl);
 
-        if(extractedText.isEmpty()) return null;
+        if(visionRawText.isEmpty()) return null;
         // split extractedText into Individual strings
-        List<String> individualAlbumsTexts = ImageReaderRegex.getTextForIndividualAlbums(extractedText);
+        List<String> getBaseCatNos = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CAT_NO);
+        List<String> getStandardCatNos = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CAT_NO_MOST_COMMON);
+        List<String> getAll = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CATALOG_NUMBER_REGEX);
+
+        /**TESTING VISION RESPONSE!!*/
+        // TODO: You Used the wrong files. Use folder for separation
+//        String test1 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0245.jpeg");
+//        String test2 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0246.jpeg");
+//        String test3 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0247.jpeg");
+//        String test4 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0248.jpeg");
+//        String test5 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0249.jpeg");
+//        String test6 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0250.jpeg");
+
+        List<String> individualAlbumsTexts = ImageReaderRegex.getTextForIndividualAlbums(visionRawText);
         // Create requests for catalogNumber
         List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.filterExtractedTextToBuildRequest(individualAlbumsTexts);
 
         List<Album> albums = getRecordsBySearchRequest(searchAlbumRequests);
 
-
-        // LookUp discogsSearchResult
-
-        // DiscogsServiceHelper.validate(results, album
-
-
-
         return albums;
     }
-
-    /***
-     * Gets catalogueNumbers from the image by filtering out format determined by regex
-     * @param url
-     * @return extractedCatalogueNumbers
-     */
-    private List<String> extractCatalogueNumbersFromImage(String url){
-
-        List<String> extractedCatalogueNumbers = imageReader.extractCatalogueNumberFromImage(url);
-
-        return extractedCatalogueNumbers;
-    }
-
-//    private List<DiscogsSearchAlbumRequest> extractCatalogueNumbersFromImageAsMap(String url){
-//
-////        List<DiscogsSearchAlbumRequest> searchAlbumRequests = imageReader.filterText(url);
-//        String extractedText = imageReader.filterText(url);
-//        List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
-//
-//
-//        return searchAlbumRequests;
-//    }
 
     public String extractTextFromImage(String url){
 
@@ -140,57 +124,10 @@ public class DiscogsService {
         return extractedCatalogueNumbers;
     }
 
-    /***
-     * Takes catalogue numbers extracted from image and gets results from Discogs
-     * @param catalogueNumbers
-     * @return DiscogsSearchResponse
-     */
-    private List<Album> getRecordsByCatalogueNumber(List<String> catalogueNumbers) {
-
-        List<Album> albums = new ArrayList<>();
-
-        for (String catalogueNumber : catalogueNumbers) {
-
-            DiscogsSearchResponse discogsSearchResponse =
-                    discogsClient.getDiscogsRecordByCategoryNumber(catalogueNumber, token, country, format, "");
-
-            if(discogsSearchResponse.getAlbums().isEmpty()) continue;
-
-            for (Album album : discogsSearchResponse.getAlbums()) {
-                album.setCatalogNumberForLookup(catalogueNumber);
-            }
-            albums.addAll(discogsSearchResponse.getAlbums());
-        }
-
-        List<Album> allFilteredAlbums = albums
-                .stream()
-                .filter(Objects::nonNull)
-                .filter(distinctByKey(Album::getTitle))
-                .collect(Collectors.toList());
-
-        List<Album> resultsWithPriceSuggestions = new ArrayList<>();
-        for (Album album : allFilteredAlbums) {
-            if(!Objects.nonNull(album)) continue;
-
-            PriceSuggestionResponse priceSuggestionResponse = getPriceSuggestions(album.getId());
-
-            try {
-                if(priceSuggestionResponse.getGood() != null) album.setAlbumGoodValue(priceSuggestionResponse.getGood().getValue());
-                if(priceSuggestionResponse.getMint() != null) album.setAlbumMintPlusValue(priceSuggestionResponse.getMint().getValue());
-            }
-            catch (NullPointerException exception) {
-                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), exception.getMessage());
-            }
-
-            resultsWithPriceSuggestions.add(album);
-        }
-
-        return resultsWithPriceSuggestions;
-    }
-
     private List<Album> getRecordsBySearchRequest(List<DiscogsSearchAlbumRequest> albumRequests) {
 
         List<Album> albums = new ArrayList<>();
+        List<Album> albumsWithPriceSuggestions = new ArrayList<>();
 
         for (DiscogsSearchAlbumRequest albumRequest : albumRequests) {
             String catNoOrTitle = "";
@@ -203,6 +140,7 @@ public class DiscogsService {
             }
             // if request all props = then we should have the catNo
             // if request.catNo == null, is request.title alphanumeric? send request.title as catNo param Or add regex with multiple dashes?
+            // todo: Throttle in a non-hacky way
             DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByCategoryNumber(catNoOrTitle, token, country, format, "");
 
             if(discogsSearchResponse.getAlbums().isEmpty()) continue;
@@ -215,21 +153,37 @@ public class DiscogsService {
             List<Album> validatedAlbums = DiscogsServiceHelper.discogsSearchAccuracyValidator(discogsSearchResponse.getAlbums(), albumRequest, albumRequests);
             albums.addAll(validatedAlbums);
         }
+//        albumsWithPriceSuggestions = getPriceSuggestions(albums);
+
         return albums;
+    }
+
+    public List<Album> getPriceSuggestions(List<Album> albums) {
+        List<Album> resultsWithPriceSuggestions = new ArrayList<>();
+        for (Album album : albums) {
+            if(!Objects.nonNull(album)) continue;
+
+            try {
+                PriceSuggestionResponse priceSuggestionResponse = getPriceSuggestions(album.getId());
+                if(priceSuggestionResponse.getGood() != null) album.setAlbumGoodValue(priceSuggestionResponse.getGood().getValue());
+                if(priceSuggestionResponse.getMint() != null) album.setAlbumMintPlusValue(priceSuggestionResponse.getMint().getValue());
+            }
+            catch (FeignException feignException) {
+                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), feignException.getMessage());
+            }
+            catch (NullPointerException exception) {
+                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), exception.getMessage());
+            }
+
+            resultsWithPriceSuggestions.add(album);
+        }
+
+        return resultsWithPriceSuggestions;
     }
 
     @SneakyThrows
     public List<AlbumEntity> getAllDiscogsCatalogNumbers() {
 
-        // Get a list of all discogs catalogue numbers
-
-        // Maybe see if there's are patterns in order of text on album spine
-
-        // Create multiple regexs
-        // "abc-123" if found move on, else do 2 then 3
-        // "abc 123"
-        // "Captal records 9000
-        // Maybe extract label and use it? Need list of labels?
         SessionFactory sessionFactory = HibernateUtil.getSessionFactoryXml();
         Session session = sessionFactory.openSession();
         DiscogsSearchResponse response = discogsClient.getAllDiscogsCatalogNumbers(token, format, 100);
@@ -286,18 +240,5 @@ public class DiscogsService {
                     .collect(Collectors.toList());
 
         return allFilteredAlbums;
-    }
-
-    /***
-     *
-     * @param keyExtractor functional interface that accepts a generic, performs the function (apply method) and returns a generic
-     * @param <T>
-     * @return
-     */
-    public static <T> Predicate<T> distinctByKey(
-            Function<? super T, ?> keyExtractor) {
-
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>(); // Map to hold values
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null; //
     }
 }

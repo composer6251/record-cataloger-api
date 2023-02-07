@@ -8,18 +8,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.*;
+
 @Slf4j
 public class ImageReaderRegex {
     public static String regexOne = "[a-zA-Z][-/s][0-9?]";
 
-    /***
-     * Patterns:
-     * abc-123456
-     * abc123456
-     * abc 123456
-     * 123456
-     * 80032-1
-     */
+
     // Look for "-"
         // Grab chars on both sides until whitespace
     // Look for only digits
@@ -27,10 +22,6 @@ public class ImageReaderRegex {
 
     // Possibly return String and let user choose?
     // Or just return the albums?
-
-    private static final List<String> COMMON_TITLE_WORDS =  Arrays.asList("The", "Band");
-    private static final String CATALOG_NUMBER_REGEX = "\\b[A-Za-z0-9_]+[\\s|\\-][\\d]+";
-    private static final String ALPHANUMERIC_CAT_NO = "\\b[A-Za-z0-9_][\\d]+";
 
     public static String releaseNumberRegex = "\\d{3,}$";
     String regexTwo = "[a-zA-Z]+[\\s|\\-][\\d]+";
@@ -77,9 +68,10 @@ public class ImageReaderRegex {
      */
     public static List<DiscogsSearchAlbumRequest> filterExtractedTextToBuildRequest(List<String> textsFromAlbums) {
 
-        Pattern CAT_NO_WITH_DASH_OR_SPACE = Pattern.compile(CATALOG_NUMBER_REGEX);
-        Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(ALPHANUMERIC_CAT_NO);
+        Pattern CAT_NO_WITH_DASH_OR_SPACE = Pattern.compile(CAT_NO_MOST_COMMON);
+        Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(CAT_NO);
 
+        // TODO: filter out "throw away" strings from textsFromAlbums? Or append to neighbor strings and store in variable? You can then recheck it?
         List<DiscogsSearchAlbumRequest> albumsToSearch = new ArrayList<>();
         for (String text: textsFromAlbums) {
             DiscogsSearchAlbumRequest albumRequest = new DiscogsSearchAlbumRequest();
