@@ -34,17 +34,18 @@ public class DiscogsController {
     @Autowired
     private ImageReader imageReader;
 
-    @GetMapping(value = "/getRecords")
-    public ResponseEntity<List<Album>> getRecords(@RequestParam @NonNull String url) {
+    @GetMapping(value = "/getRecordsBySpineText")
+    public ResponseEntity<List<Album>> getRecordsBySpineText(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecords(url);
+        List<Album> albums = discogsService.getRecordsBySpineText(url);
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getRecordsNew")
-    public ResponseEntity<List<Album>> getRecordsNew(@RequestParam @NonNull String url) {
+    @GetMapping(value = "/getRecordsByRegex")
+    public ResponseEntity<List<Album>> getRecordsByRegex(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecords(url);
+        List<Album> albums = discogsService.getRecordsByRegex(url);
+        log.debug("Completed request to get records by regex with {} albums", albums.size());
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 
@@ -67,7 +68,7 @@ public class DiscogsController {
     )
     public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecords(url);
+        List<Album> albums = discogsService.getRecordsBySpineText(url);
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 

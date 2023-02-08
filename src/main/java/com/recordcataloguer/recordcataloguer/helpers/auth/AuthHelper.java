@@ -65,7 +65,6 @@ public class AuthHelper {
                         "oauth_signature=\"" + oAuth.getOauth_signature() +  oAuthTokenSecret + "\", " +
                         "oauth_signature_method=\"PLAINTEXT\", " +
                         "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
-        log.info("Generated Auth Header for User Actions \n{}", auth);
         return auth;
 
     }

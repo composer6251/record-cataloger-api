@@ -52,7 +52,7 @@ public class Album {
     @JsonProperty("formats")
     private ArrayList<Object> formats;
     private byte[] encodedThumb;
-    private String catalogNumberForLookup;
+    private String searchQuery;
     private double albumMintPlusValue;
     private double albumGoodValue;
     private boolean foundByCatNo = true;

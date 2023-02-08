@@ -13,7 +13,12 @@ public class AlbumAnnotation {
     private String description;
     private int xVerticesSum;
     private int yVerticesSum;
+
     private int firstXVert;
-    private int firstYVert;
+    private int secondXVert;
+    private int thirdXVert;
+    private int fourthXVert;
+
+//    private int firstYVert;
 
 }

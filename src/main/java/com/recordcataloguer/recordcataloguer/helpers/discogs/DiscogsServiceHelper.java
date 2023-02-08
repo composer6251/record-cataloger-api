@@ -2,59 +2,160 @@ package com.recordcataloguer.recordcataloguer.helpers.discogs;
 
 import com.google.cloud.vision.v1.BoundingPoly;
 import com.google.cloud.vision.v1.EntityAnnotation;
-import com.google.cloud.vision.v1.Vertex;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.dto.vision.AlbumAnnotation;
 import lombok.extern.slf4j.Slf4j;
 
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import info.debatty.java.stringsimilarity.SorensenDice;
 import org.apache.commons.lang3.StringUtils;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO_MOST_COMMON;
+import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.*;
 
 @Slf4j
 public class DiscogsServiceHelper {
 
-    public static List<EntityAnnotation> getIndexesOfAlbums(List<EntityAnnotation> annotations) {
+    // Filter out catalogue numbers by strict comparison. ie. 2 or more alpha - 4 or more numbers, or " " instead of dash
+    // Filter out Titles by
+    // 1. Alpha Alpha
+    //  2. Alpha single
+    //  3. Ignore record labels by contains COMMON_LABEL_WORDS
+    // Store suspected artists/title
+    // Ask discogs if they are real
+
+    public static List<DiscogsSearchAlbumRequest> buildSearchRequestsFromIndividualStrings(List<String> textsFromAlbums, String regex) {
+
+        List<DiscogsSearchAlbumRequest> albumsToSearch = new ArrayList<>();
+        for (String text : textsFromAlbums) {
+
+            albumsToSearch.add(buildSingleRequest(text, regex));
+
+        }
+            return albumsToSearch;
+    }
+    public static List<DiscogsSearchAlbumRequest> buildSearchRequestsFromRawText(String rawText, String regex) {
+
+        List<DiscogsSearchAlbumRequest> albumsToSearch = new ArrayList<>();
+
+
+        albumsToSearch.add(buildSingleRequest(rawText, regex));
+
+
+        return albumsToSearch;
+    }
+
+    public static DiscogsSearchAlbumRequest buildSingleRequest(String rawText, String regex) {
+
+        Pattern regexToUse = Pattern.compile(regex);
+        Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(CAT_NO);
+
+        DiscogsSearchAlbumRequest albumRequest = new DiscogsSearchAlbumRequest();
+        Matcher matchedText = regexToUse.matcher(rawText);
+        List<String> matches = new ArrayList<>();
+        albumRequest.setTitle(rawText);
+        albumRequest.setOriginalString(rawText);
+
+        while(matchedText.find()){
+            matches.add(matchedText.group());
+        }
+        if(matches.size() == 0) {
+            Matcher noDashOrSpace = CAT_NO_WITHOUT_SPACE.matcher(rawText);
+
+            while(noDashOrSpace.find()){
+                matches.add(noDashOrSpace.group());
+            }
+        }
+        // maybeCatNo StringUtils.isNumericSpace (123 12323)
+        // If 1 match that contains a dash, then that is the only thing we have got to go on, but it should be the catalog number
+        if(matches.size() == 1 && StringUtils.contains(matches.get(0), "-")) {
+            albumRequest.setCatNo(matches.get(0));
+        }
+        if(matches.size() == 1 && !StringUtils.contains(matches.get(0), "-")) {
+            albumRequest.setCatNo(matches.get(0));
+            albumRequest.setTitle(rawText);
+        }
+        // TODO: Implement
+        if(matches.size() > 1){
+
+        }
+
+        albumRequest.setConfidenceLevel(getConfidenceLevel(albumRequest.getCatNo(), albumRequest.getTitle()));
+
+        // If there's no catNo and the title is an unrealistic length for an album OR the catno is < 5 characters, it is probably not accurate
+        if((StringUtils.isBlank(albumRequest.getCatNo()) && albumRequest.getOriginalString().length() < 10)
+                || (!StringUtils.isBlank(albumRequest.getCatNo()) && albumRequest.getCatNo().length() < 4));
+
+        return albumRequest;
+
+    }
+
+
+    private static int getConfidenceLevel(String maybeCatNo, String maybeTitle) {
+        /**values to determine accuracy of search**/
+        boolean maybeTitleHasMoreWhiteSpaces = StringUtils.countMatches(maybeTitle, StringUtils.SPACE) > StringUtils.countMatches(maybeCatNo, StringUtils.SPACE);
+        boolean maybeTitleIsAlphaOnly = StringUtils.isAlpha(StringUtils.remove(maybeTitle, " "));
+        boolean maybeTitleContainsCommonWord = COMMON_TITLE_WORDS.contains(StringUtils.split(maybeTitle));
+        boolean maybeCatNoContainsDash = StringUtils.contains(maybeCatNo, "-");
+
+        int confidenceLevel = 0;
+        if(maybeTitleHasMoreWhiteSpaces) confidenceLevel += 40;
+        if(maybeTitleIsAlphaOnly) confidenceLevel += 30;
+        if(maybeTitleContainsCommonWord) confidenceLevel += 20;
+        if(maybeCatNoContainsDash) confidenceLevel += 40;
+
+        return confidenceLevel;
+    }
+    // TODO: CAN I DETERMINE FROM SPINETEXTS WHAT IS TITLE AND WHAT IS CATNO?
+    public static List<String> getSearchStringsByImageVertices(List<EntityAnnotation> annotations) {
         List<AlbumAnnotation> albumAnnotations;
-        annotations.sort(Comparator.comparing(a -> a.getBoundingPoly().getVertices(0).getX()));
+        annotations.sort(Comparator.comparing(a -> getVerticesTotal(a.getBoundingPoly(), 'X')));
+        // Get album annotations with initial XVertex and totals for X and Y Vertices
         albumAnnotations = annotations
                 .stream()
                 .map(a -> {
-                    int firstXVertex = a.getBoundingPoly().getVertices(0).getX();
-                    int firstYVertex = a.getBoundingPoly().getVertices(0).getY();
+                    int xVert1 = a.getBoundingPoly().getVertices(0).getX();
+//                    int firstYVertex = a.getBoundingPoly().getVertices(0).getY();
+                    int xVert2 = a.getBoundingPoly().getVertices(1).getX();
+                    int xVert3 = a.getBoundingPoly().getVertices(2).getX();
+                    int xVert4 = a.getBoundingPoly().getVertices(3).getX();
+
                     int xTotal = getVerticesTotal(a.getBoundingPoly(), 'X');
                     int yTotal = getVerticesTotal(a.getBoundingPoly(), 'Y');
 
-                    return new AlbumAnnotation(annotations.indexOf(a), a.getDescription(), xTotal, yTotal, firstXVertex, firstYVertex);
+                    return new AlbumAnnotation(annotations.indexOf(a), a.getDescription(), xTotal, yTotal, xVert1, xVert2, xVert3, xVert4);
                 }).collect(Collectors.toList());
 
+        // Sort the albumAnnotations by firstXVert, to get horizontal ordering, then sort horizontal ordering by yVertices to vertical aspect
         albumAnnotations.sort(Comparator.comparing(AlbumAnnotation::getFirstXVert).thenComparing(AlbumAnnotation::getYVerticesSum).reversed());
-        albumAnnotations.forEach(a -> log.info("Album Annotations {}, ",a ));
+
         List<String> albumSpineTexts = new ArrayList<>();
         StringBuilder stringBuilder = new StringBuilder();
+
+        // Compare current and next albumAnnotation to determine if they belong on the same album spine
+        int separationDistance = 20;
         for (int i = 0; i < albumAnnotations.size() - 1; i++) {
             AlbumAnnotation current = albumAnnotations.get(i);
             AlbumAnnotation next = albumAnnotations.get(i + 1);
-
-            stringBuilder.append("| ").append(current.getDescription());
-
-            boolean isSameAlbum = Math.abs(next.getFirstXVert() - current.getFirstXVert()) <= 30;
+            // TODO: Add string to list, because we do not know if the texts are in the right order on the spine, but we can check by YVertices
+            // TODO: Give user option to pick separator distance
+            // TODO: Maybe option to specify number of records
+            stringBuilder.append(" ").append(current.getDescription());
+            // if the xVertices are too far apart, then they are likely on different album spines
+            boolean isSameAlbum = Math.abs(next.getFirstXVert() - current.getFirstXVert()) <= separationDistance
+                    || Math.abs(next.getSecondXVert() - current.getSecondXVert()) <= separationDistance
+                    || Math.abs(next.getThirdXVert() - current.getThirdXVert()) <= separationDistance
+                    || Math.abs(next.getFourthXVert() - current.getFourthXVert()) <= separationDistance;
+            // If it's probably the same, we've already appended the description for current, move on to next iteration.
+            // TODO: Compare EACH x vert and if ANY are within 30, then it's the same album
             if(isSameAlbum) {
                 continue;
             }
-            // We are on the next album
 
+            // We are on the next album so add spineString to list and reset stringBuilder
             albumSpineTexts.add(stringBuilder.toString());
             try {
             stringBuilder.delete(0, stringBuilder.length());
@@ -64,19 +165,35 @@ public class DiscogsServiceHelper {
             }
 
         }
-        List<AlbumAnnotation> sortedAlbumAnnotations = albumAnnotations.stream()
-                .sorted(Comparator.comparing(album -> album.getXVerticesSum()))
-                .collect(Collectors.collectingAndThen(Collectors.toList(),
-                        albums -> albums.stream().sorted(Comparator.comparing(album -> album.getYVerticesSum()))))
-                .collect(Collectors.toList());
 
-        albumAnnotations
-                .sort(Comparator.comparing(AlbumAnnotation::getXVerticesSum).reversed().thenComparing(AlbumAnnotation::getYVerticesSum));
+        return albumSpineTexts;
+    }
+    // Take in strinngs
+    // Split on (|)
+    // Check if check if contains catNo format
+    // extract maybe title
+    // Build requests from there
+    public static void filterAlbumSpineText(List<String> spineText) {
 
+        for (String text: spineText) {
+            List<String> maybeCatNos = new ArrayList<>();
+            maybeCatNos.addAll(searchForString(text, CAT_NO_SIX_AND_GREATER));
+            // maybeTitle = regex alpha + " " alpha
+            String[] splitString = text.split("|");
 
+        }
 
+    }
+    private static List<String> searchForString(String searchText, String regex) {
+        Pattern pattern = Pattern.compile(regex);
 
-        return annotations;
+        Matcher matchedText = pattern.matcher(searchText);
+        List<String> matches = new ArrayList<>();
+
+        while(matchedText.find()){
+            matches.add(matchedText.group());
+        }
+        return matches;
     }
 
     public static List<EntityAnnotation> getNextAlbumAnnotations(List<EntityAnnotation> annotations) {
@@ -229,14 +346,15 @@ public class DiscogsServiceHelper {
     }
 
 
+    public static List<String> getTextForIndividualAlbums(String visionResponse) {
+        String[] textForIndividualAlbums = visionResponse.split("\n");
+
+        return Arrays.stream(textForIndividualAlbums).toList();
+    }
+
     public static List<String> getSixAndGreaterLengthCatNos(String rawVisionText, String regex) {
         // Look for sixAndGreater
-        // Then look up all
-
-        // Or look for all alphanumeric patterns and then filter by size?
-
-        // Can I deconstruct the vision text well enough?
-        Pattern REGEX_ALPHANUMERIC = Pattern.compile(StringUtils.defaultString(regex, CAT_NO_MOST_COMMON));
+        Pattern REGEX_ALPHANUMERIC = Pattern.compile(StringUtils.defaultString(regex, CAT_NO_SIX_AND_GREATER));
         Matcher matchedText = REGEX_ALPHANUMERIC.matcher(rawVisionText);
         List<String> matches = new ArrayList<>();
         while(matchedText.find()){
@@ -246,69 +364,31 @@ public class DiscogsServiceHelper {
         return matches;
     }
 
-    public static List<Album> discogsSearchAccuracyValidator(List<Album> results, DiscogsSearchAlbumRequest albumRequest, List<DiscogsSearchAlbumRequest> originals) {
+//    public static List<DiscogsSearchAlbumRequest> getCatalogNumberAndTitlesMap(String visionText) {
+//
+//        List<String> individualTextForAlbums = getTextForIndividualAlbums(visionText);
+//
+//        List<DiscogsSearchAlbumRequest> albumSearchRequests = buildSearchRequestsFromIndividualStrings(individualTextForAlbums);
+//
+//        return albumSearchRequests;
+//    }
 
-        // Filter out duplicates and nulls
-        List<Album> resultsWithoutOutDuplicateTitles = results.stream()
-                .filter(Objects::nonNull)
-                .filter(distinctByKey(Album::getTitle))
-                .collect(Collectors.toList());
-        // TODO: Unit test this can't throw out of bounds
-        // If only 1 result and catNos are exact match, this is our guy. Should I compare anything else?
-        if(resultsWithoutOutDuplicateTitles.size() == 1 &&
-                (resultsWithoutOutDuplicateTitles.get(0).getCatno().equalsIgnoreCase(albumRequest.getCatNo()) ||
-                        resultsWithoutOutDuplicateTitles.get(0).getCatno().equalsIgnoreCase(albumRequest.getTitle()))) {
-            return resultsWithoutOutDuplicateTitles;
+    public static List<String> extractRecordCatalogueNumber(String text) {
+
+        // Pass in regex and individual text for albums to method
+        // result passes into get confidence level
+        // Retry with different regex if needed
+
+        List<String> individualTextForAlbums = getTextForIndividualAlbums(text);
+        Map<String, String> albumInfo = new HashMap<>();
+
+        Pattern REGEX_ALPHANUMERIC = Pattern.compile(CATALOG_NUMBER_REGEX);
+        Matcher matchedText = REGEX_ALPHANUMERIC.matcher(text);
+        List<String> matches = new ArrayList<>();
+        while(matchedText.find()){
+            matches.add(matchedText.group());
         }
 
-        // todo: Filter out null catNos when doing Title comparison
-        // todo: Is there an album/artist field
-        List<Album> titleFilteredAlbums;
-        // try searching originals.title vs
-        titleFilteredAlbums = originals.stream()
-        .flatMap(o -> resultsWithoutOutDuplicateTitles.stream()
-        .filter(r -> getStringSimilarity(o.getTitle().toLowerCase(Locale.ROOT), r.getTitle().toLowerCase(Locale.ROOT)) > 50D))
-        .collect(Collectors.toList());
-        if(titleFilteredAlbums.size() == 0) {
-            Album album =  Album.builder()
-                    .catno(albumRequest.getCatNo())
-                    .title(albumRequest.getTitle())
-                    .foundByCatNo(false)
-                    .build();
-            return List.of(album);
-        }
-
-        List<Album> resultsMatchingCatNo = resultsWithoutOutDuplicateTitles.stream()
-                .filter(album -> album.getCatno().equalsIgnoreCase(albumRequest.getCatNo()))
-                .collect(Collectors.toList());
-
-        return titleFilteredAlbums;
-    }
-
-    // Vision can return album info in separate strings, so we compare the titles to see if they match and of the album results
-
-    private static Double getStringSimilarity(String str, String str2) {
-        SorensenDice sorensenDice = new SorensenDice();
-        Double percentage = sorensenDice.similarity(str, str2);
-        return percentage * 100;
-    }
-
-    private static List<String> getTextForIndividualAlbums(String visionResponse) {
-        String[] textForIndividualAlbums = visionResponse.split("\n");
-
-        return Arrays.stream(textForIndividualAlbums).toList();
-    }
-
-    /***
-     *
-     * @param keyExtractor functional interface that accepts a generic, performs the function (apply method) and returns a generic
-     * @param <T>
-     * @return
-     */
-    public static <T> Predicate<T> distinctByKey(
-            Function<? super T, ?> keyExtractor) {
-
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>(); // Map to hold values
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null; //
+        return matches;
     }
 }

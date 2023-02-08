@@ -20,6 +20,23 @@ public interface DiscogsClient {
     );
 
     @GetMapping(value = DiscogsUrls.DATABASE_API + DiscogsUrls.SEARCH_ENDPOINT, consumes = "application/json")
+    DiscogsSearchResponse getDiscogsRecordByQueryString(
+            @RequestParam("query") String query,
+            @RequestParam("token") String token,
+            @RequestParam("country") String country,
+            @RequestParam("format") String format
+    );
+
+    @GetMapping(value = DiscogsUrls.DATABASE_API + DiscogsUrls.SEARCH_ENDPOINT, consumes = "application/json")
+    DiscogsSearchResponse getDiscogsRecordByTitle(
+            @RequestParam("title") String title,
+            @RequestParam("token") String token,
+            @RequestParam("country") String country,
+            @RequestParam("format") String format
+            );
+
+
+    @GetMapping(value = DiscogsUrls.DATABASE_API + DiscogsUrls.SEARCH_ENDPOINT, consumes = "application/json")
     DiscogsSearchResponse getAllDiscogsCatalogNumbers(
             @RequestParam("token") String token,
             @RequestParam("format") String format,

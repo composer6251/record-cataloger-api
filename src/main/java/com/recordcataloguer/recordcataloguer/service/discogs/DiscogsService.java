@@ -1,11 +1,13 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
+import com.google.cloud.vision.v1.EntityAnnotation;
 import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
+import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
@@ -27,7 +29,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.*;
+import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO;
+import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO_SIX_AND_GREATER;
 
 @Service
 @Slf4j
@@ -45,6 +48,29 @@ public class DiscogsService {
 
     private final String token = DiscogsTokens.DISCOGS_PERSONAL_ACCESS_TOKEN;
 
+    public String extractTextFromImage(String url){
+
+        return imageReader.extractRawVisionText(url);
+    }
+
+    public List<Album> getRecordsByRegex(String imageUrl) {
+        log.info("received request to getRecords by imageUrl");
+
+        List<Album> albums = getRecordsByCatNo(imageUrl);
+
+        List<Album> albumsWithPricing = getPriceSuggestions(albums);
+
+        return albumsWithPricing;
+    }
+
+    public List<Album> getRecordsBySpineText(String imageUrl) {
+        log.info("received request to getRecords by imageUrl");
+
+        List<Album> discogsSearchResponse = getRecordsByAlbumSpineText(imageUrl);
+
+        return discogsSearchResponse;
+    }
+
     public String uploadRelease() {
         log.info("received request to retrieve user authorization URL");
 
@@ -53,6 +79,7 @@ public class DiscogsService {
         return authHeader;
     }
 
+
     public PriceSuggestionResponse getPriceSuggestions(int releaseId) throws FeignException {
         log.info("received request to getPriceSuggestions");
 
@@ -60,21 +87,6 @@ public class DiscogsService {
         PriceSuggestionResponse priceSuggestionsResponse = discogsClient.getPriceSuggestions(authHeader, releaseId);
 
         return priceSuggestionsResponse;
-    }
-
-    public String verifyIdentity() {
-        log.info("received request to verify user identity");
-
-        Optional<String> url = AuthHelper.getOAuthToken();
-        return url.orElse("");
-    }
-
-    public List<Album> getRecords(String imageUrl) {
-        log.info("received request to getRecords by imageUrl");
-
-        List<Album> discogsSearchResponse = getRecordsByImageText(imageUrl);
-
-        return discogsSearchResponse;
     }
 
     public String getAuthorizationUrl() {
@@ -89,48 +101,64 @@ public class DiscogsService {
      * @param imageUrl
      * @return ResponseEntity of DiscogsResponse
      */
-    private List<Album> getRecordsByImageText(String imageUrl) {
-        // Get image text
+    private List<Album> getRecordsByAlbumSpineText(String imageUrl) {
+
+        /*****METHOD 1 Using AlbumNotation Objects, filtering based on initialXvert and YvertTotals*****/
+        List<EntityAnnotation> annotations = imageReader.getVisionEntityAnnotations(imageUrl);
+        List<String> individualAlbumSpineTexts = DiscogsServiceHelper.getSearchStringsByImageVertices(annotations);
+        List<Album> albumsToReturn = new ArrayList<>();
+        for (String text : individualAlbumSpineTexts) {
+
+            DiscogsSearchResponse discogsSearchResponse = discogsClient.getDiscogsRecordByQueryString(text, token, country, format);
+
+            if(discogsSearchResponse.getAlbums().isEmpty()) continue;
+
+            // Sets property used to determine what used for lookup, NOT what was in the result
+            for (Album album : discogsSearchResponse.getAlbums()) {
+                album.setSearchQuery(text);
+            }
+            // TODO: May have to make sure records are separated by more distance
+
+            List<Album> validatedAlbums = DiscogsSearchResultValidator.filterOutResponseDuplicates(discogsSearchResponse.getAlbums());
+            List<Album> validAlbums = DiscogsSearchResultValidator.filterOutByAnnotationDescriptionSimilar(discogsSearchResponse.getAlbums(), individualAlbumSpineTexts);
+            List<Album> fullyValidated = DiscogsSearchResultValidator.filterOutByAnnotationDescriptionExact(discogsSearchResponse.getAlbums(), individualAlbumSpineTexts);
+            albumsToReturn.addAll(validatedAlbums);
+        }
+
+        return albumsToReturn;
+
+    }
+
+    /****METHOD 2 using raw image texts and regexes******/
+    public List<Album> getRecordsByCatNo(String imageUrl) {
         String visionRawText = extractTextFromImage(imageUrl);
 
         if(visionRawText.isEmpty()) return null;
         // split extractedText into Individual strings
-        List<String> getBaseCatNos = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CAT_NO);
-        List<String> getStandardCatNos = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CAT_NO_MOST_COMMON);
-        List<String> getAll = DiscogsServiceHelper.getSixAndGreaterLengthCatNos(visionRawText, CATALOG_NUMBER_REGEX);
-
-        /**TESTING VISION RESPONSE!!*/
-        // TODO: You Used the wrong files. Use folder for separation
-//        String test1 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0245.jpeg");
-//        String test2 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0246.jpeg");
-//        String test3 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0247.jpeg");
-//        String test4 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0248.jpeg");
-//        String test5 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0249.jpeg");
-//        String test6 = imageReader.extractTextFromImage("file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/testing-separation-albums/IMG_0250.jpeg");
-
-        List<String> individualAlbumsTexts = ImageReaderRegex.getTextForIndividualAlbums(visionRawText);
+        List<DiscogsSearchAlbumRequest> searchAlbumRequestsByRegex = DiscogsServiceHelper.buildSearchRequestsFromRawText(visionRawText, CAT_NO_SIX_AND_GREATER);
+        List<String> individualAlbumsTexts = DiscogsServiceHelper.getTextForIndividualAlbums(visionRawText);
+        List<DiscogsSearchAlbumRequest> searchAlbumRequests = DiscogsServiceHelper.buildSearchRequestsFromIndividualStrings(individualAlbumsTexts, CAT_NO_SIX_AND_GREATER);
         // Create requests for catalogNumber
-        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.filterExtractedTextToBuildRequest(individualAlbumsTexts);
 
-        List<Album> albums = getRecordsBySearchRequest(searchAlbumRequests);
-
-        return albums;
-    }
-
-    public String extractTextFromImage(String url){
-
-        String extractedCatalogueNumbers = imageReader.extractTextFromImage(url);
-
-        return extractedCatalogueNumbers;
+        return getRecordsBySearchRequest(searchAlbumRequests);
     }
 
     private List<Album> getRecordsBySearchRequest(List<DiscogsSearchAlbumRequest> albumRequests) {
 
         List<Album> albums = new ArrayList<>();
-        List<Album> albumsWithPriceSuggestions = new ArrayList<>();
-
+        int i = 21;
         for (DiscogsSearchAlbumRequest albumRequest : albumRequests) {
+            i++;
+            if(i % 20 == 0){
+                log.info("Pausing SEARCH requests for 1 minute. requests size {}", albumRequests.size());
+                try {
+                    TimeUnit.SECONDS.sleep(30);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             String catNoOrTitle = "";
+
             //If no catNo but we have title, send title
             if(StringUtils.isBlank(albumRequest.getCatNo()) && !StringUtils.isBlank(albumRequest.getTitle())) {
                 catNoOrTitle = albumRequest.getTitle();
@@ -147,22 +175,28 @@ public class DiscogsService {
 
             // Sets property used to determine what used for lookup, NOT what was in the result
             for (Album album : discogsSearchResponse.getAlbums()) {
-                album.setCatalogNumberForLookup(albumRequest.getCatNo());
+                album.setSearchQuery(albumRequest.getCatNo());
             }
 
-            List<Album> validatedAlbums = DiscogsServiceHelper.discogsSearchAccuracyValidator(discogsSearchResponse.getAlbums(), albumRequest, albumRequests);
+            List<Album> validatedAlbums = DiscogsSearchResultValidator.validateSearchResultsByRequestAndResults(discogsSearchResponse.getAlbums(), albumRequest, albumRequests);
             albums.addAll(validatedAlbums);
         }
-//        albumsWithPriceSuggestions = getPriceSuggestions(albums);
 
-        return albums;
+        List<Album> validatedAlbums = albums.stream().filter(a -> a.getTitle() != null && a.getId() != 0).collect(Collectors.toList());
+        return validatedAlbums;
     }
 
     public List<Album> getPriceSuggestions(List<Album> albums) {
         List<Album> resultsWithPriceSuggestions = new ArrayList<>();
+        log.info("Getting price suggestions for {} albums", albums.size());
         for (Album album : albums) {
             if(!Objects.nonNull(album)) continue;
+            try{
+                TimeUnit.SECONDS.sleep(1);
 
+            }catch (Exception exception) {
+                log.info("Exception sleeping thread {}", exception.getMessage());
+            }
             try {
                 PriceSuggestionResponse priceSuggestionResponse = getPriceSuggestions(album.getId());
                 if(priceSuggestionResponse.getGood() != null) album.setAlbumGoodValue(priceSuggestionResponse.getGood().getValue());
@@ -172,7 +206,7 @@ public class DiscogsService {
                 log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), feignException.getMessage());
             }
             catch (NullPointerException exception) {
-                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), exception.getMessage());
+                log.info("Exception assigning album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), exception.getMessage());
             }
 
             resultsWithPriceSuggestions.add(album);
@@ -240,5 +274,13 @@ public class DiscogsService {
                     .collect(Collectors.toList());
 
         return allFilteredAlbums;
+    }
+
+
+    public String verifyIdentity() {
+        log.info("received request to verify user identity");
+
+        Optional<String> url = AuthHelper.getOAuthToken();
+        return url.orElse("");
     }
 }

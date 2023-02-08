@@ -41,42 +41,42 @@ public class ImageReader {
         String text =
                 this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
 
-        List<String> catalogueNumbers = ImageReaderRegex.extractRecordCatalogueNumber(text);
+        List<String> catalogueNumbers = DiscogsServiceHelper.extractRecordCatalogueNumber(text);
 
         return catalogueNumbers;
     }
-
-//    public String filterText(String imageUrl) {
-//        String text =
-//                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
-//
-////        List<DiscogsSearchAlbumRequest> searchAlbumRequests = ImageReaderRegex.getCatalogNumberAndTitlesMap(text);
-//
-//        return text;
-//    }
-
-    // TODO: Maybe use annotatedResponse and vertices to determine location in picture. i.e. if it's top, and not a catNo, cat number maybe at the bottom
-    // TODO: Better regexing??
-    // TODO: More user burden?
 
     private void updateAlbumString(EntityAnnotation entityAnnotation, EntityAnnotation entityAnnotation2) {
         if(compareVerts(entityAnnotation.getBoundingPoly().getVertices(0).getX(), entityAnnotation2.getBoundingPoly().getVertices(0).getX())) {
             currentAlbumString.append(" " + entityAnnotation2.getDescription());
         }
     }
+
     private boolean compareVerts(int vert1, int vert2) {
         Integer diff = vert1 - vert2;
         log.info("Difference between x axes {} pt1: {} pt2: {} ", diff, vert1, vert2);
         return diff < 30 && diff > -30;
     }
+
+    public List<EntityAnnotation> getVisionEntityAnnotations(String imageUrl) {
+        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
+
+        return new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
+    }
+
     StringBuilder currentAlbumString = new StringBuilder();
+
+    public String extractRawVisionText(String imageUrl) {
+        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
+        return annotateImageResponse.getTextAnnotationsList().get(0).getDescription();
+    }
 
     public String extractTextFromImage(String imageURL) {
         AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageURL), Feature.Type.TEXT_DETECTION);
         // List must be mutable in order to remove matched annotations
         List<EntityAnnotation> annotations = new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
 
-        DiscogsServiceHelper.getIndexesOfAlbums(annotations);
+        DiscogsServiceHelper.getSearchStringsByImageVertices(annotations);
         DiscogsServiceHelper.getNextAlbumAnnotations(annotations);
 
         DiscogsServiceHelper.getAlbumsForLookup(annotations, 10);
