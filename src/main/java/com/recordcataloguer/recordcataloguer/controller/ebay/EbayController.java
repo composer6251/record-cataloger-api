@@ -1,5 +1,6 @@
 package com.recordcataloguer.recordcataloguer.controller.ebay;
 
+import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import com.recordcataloguer.recordcataloguer.service.EbayService;
@@ -15,7 +16,7 @@ import java.net.http.HttpResponse;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = "http://10.116.244.134") // Allow from app
+@CrossOrigin(origins = LocalHostUrls.LAPTOP_IP) // Allow from app
 public class EbayController {
     @Autowired
     private EbayService ebayService;
@@ -23,6 +24,7 @@ public class EbayController {
     @GetMapping("/ebay/auth")
     public HttpStatus getEbayAuthorization() throws IOException {
         log.debug("Request received for ebay auth");
+
         return ebayService.getEbayAuthorization();
 
     }
@@ -31,6 +33,7 @@ public class EbayController {
     public HttpResponse searchByArtistAndAlbum()
             throws URISyntaxException, IOException, InterruptedException {
         log.debug("Request received for ebay search by artist and album");
+
         return ebayService.searchAlbumByArtistAndNameHttp("CatStevens", "name");
     }
 }

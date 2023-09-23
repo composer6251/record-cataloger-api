@@ -15,15 +15,36 @@ import java.util.Base64;
 @Slf4j
 public class ImageEncodingHelper {
 
-//    private static final String filePath = "/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/20221017_163141.jpg";
+    private ImageEncodingHelper(){}
 
-    // TODO: Can we use the record number by extracting text from image?
-    // Is the eBay image endpoint useless?
-    // Are record numbers predictable in length/format?
+    public static String encodeImage(String inputFileName, String outputFileName) throws IOException {
+        log.info("Encoding image at location {}", inputFileName);
 
-    public ImageEncodingHelper() throws IOException {
+        String encodedString = "";
 
+        //get file content in binary
+        byte[] fileContent = FileUtils.readFileToByteArray(new File(inputFileName));
+
+        //encode binary to string
+        encodedString = Base64.getEncoder().encodeToString(fileContent);
+
+        // Write the encoded string to a file
+        FileUtils.write(new File("/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/testString"), encodedString);
+
+        return encodedString;
     }
+
+    public static final String decodeImage(String encodedString, String outputFileName) throws IOException {
+        if(outputFileName.isEmpty()) throw new IOException("Output filename cannot be empty for encoding an image");if(outputFileName.isEmpty()) throw new IOException("File name cannot be empty for encoding an image");
+
+        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+
+        FileUtils.writeByteArrayToFile(new File(outputFileName), decodedBytes);
+
+        return encodedString;
+    }
+
+    /******TODO: Remove if unnecessary********/
     public static byte[] getEncodedImageFromDiscogs(String url) {
 
         byte[] encodedImage = null;
@@ -37,38 +58,4 @@ public class ImageEncodingHelper {
         }
         return encodedImage;
     }
-
-
-    public static String encodeImage(String inputFileName, String outputFileName) throws IOException {
-        log.info("Encoding image at location {}", inputFileName);
-
-        // Default outputFileName if none
-        outputFileName = outputFileName.isEmpty() ? "" : outputFileName;
-
-        String encodedString = "";
-        // Determine if valid base64 A-Za-z0-9+/
-        //get file content in binary
-        byte[] fileContent = FileUtils.readFileToByteArray(new File(inputFileName));
-//        log.info("binary image content {}", fileContent);
-
-        encodedString = Base64.getEncoder().encodeToString(fileContent);
-        FileUtils.write(new File("/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/testString"), encodedString);
-//        log.info("binary encoded as string {}", encodedString);
-        //encode binary to string
-
-        // Write decoded
-        // Todo: Correct file being used?
-        return encodedString;
-
-    }
-
-    public static final String decodeImage(String encodedString, String outputFileName) throws IOException {
-        outputFileName = outputFileName.isEmpty() ? "" : outputFileName;
-        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
-        FileUtils.writeByteArrayToFile(new File(outputFileName), decodedBytes);
-
-
-        return encodedString;
-    }
-
 }

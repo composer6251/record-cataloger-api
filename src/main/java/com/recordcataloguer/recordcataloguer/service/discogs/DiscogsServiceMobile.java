@@ -4,10 +4,10 @@ import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsUserCredentials;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
-import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse;
+import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
 import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
@@ -121,7 +121,9 @@ public class DiscogsServiceMobile {
      */
     public List<Album> getPriceSuggestions(List<Album> albums) {
         List<Album> resultsWithPriceSuggestions = new ArrayList<>();
+
         log.info("Getting price suggestions for {} albums", albums.size());
+
         for (Album album : albums) {
             if(!Objects.nonNull(album)) continue;
             try{
@@ -135,11 +137,8 @@ public class DiscogsServiceMobile {
                 if(priceSuggestionResponse.getGood() != null) album.setAlbumGoodValue(priceSuggestionResponse.getGood().getValue());
                 if(priceSuggestionResponse.getMint() != null) album.setAlbumMintPlusValue(priceSuggestionResponse.getMint().getValue());
             }
-            catch (FeignException feignException) {
+            catch (FeignException | NullPointerException feignException) {
                 log.info("Exception assigning album value to release {} and catno {} with message\n {}", album.getReleaseId(), album.getCatno(), feignException.getMessage());
-            }
-            catch (NullPointerException exception) {
-                log.info("Exception assigning album value to release {} and catno {} with message\n {}", album.getReleaseId(), album.getCatno(), exception.getMessage());
             }
 
             resultsWithPriceSuggestions.add(album);
@@ -149,17 +148,6 @@ public class DiscogsServiceMobile {
     }
 
 /***************TODO: DELETE OR IMPLEMENT UNUSED METHODS****************/
-
-//    // TODO: IMPLEMENT THIS
-//    public String publishAlbumToCategorizedCollection(String releaseId) {
-//        log.info("received request to publishAlbum to CATEGORIZED COLLECTION with releaseId {}", releaseId);
-//
-//        String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
-//        discogsClient.uploadAlbumToCollection(authHeader, DiscogsUserCredentials.DISCOGS_USERNAME, folder, "placeholder");
-//
-//        return authHeader;
-//    }
-
 
     public List<Album> getNextPageOfResults(DiscogsSearchResponse response) {
         List<Album> allFilteredAlbums = new ArrayList<>();

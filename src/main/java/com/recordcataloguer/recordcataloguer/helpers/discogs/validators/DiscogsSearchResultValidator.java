@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.helpers.discogs.validators;
 
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.request.DiscogsSearchAlbumRequest;
 import info.debatty.java.stringsimilarity.SorensenDice;
 import lombok.extern.slf4j.Slf4j;
 

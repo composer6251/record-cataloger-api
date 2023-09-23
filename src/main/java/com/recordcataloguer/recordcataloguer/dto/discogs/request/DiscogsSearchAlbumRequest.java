@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.dto.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -26,4 +26,5 @@ public class DiscogsUrls {
     public static final String AUTHORIZATION_URL = DISCOGS_BASE_URL + OAUTH_API + "/authorize";
     public static final String IDENTITY_URL = DISCOGS_API_BASE_URL + OAUTH_API + IDENTITY_ENDPOINT;
     public static final String DATABASE_SEARCH_URL = DISCOGS_API_BASE_URL + DATABASE_API + SEARCH_ENDPOINT;
+
 }

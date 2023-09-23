@@ -1,9 +1,10 @@
-package com.recordcataloguer.recordcataloguer.dto.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs.response;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsResultDTO;
 import lombok.Builder;
 import lombok.Data;
 
@@ -22,7 +23,7 @@ public class DiscogsSearchResponse {
         for (Album album : albums) {
             discogsResultDTOList.add(DiscogsResultDTO.builder()
                     .resultsFromCatNo(albums.size())
-                    .catno(album.getCatno())
+                    .catNo(album.getCatno())
                     .title(album.getTitle())
                     .barcode(album.getBarcode())
                     .coverImage(album.getCoverImage())
@@ -49,48 +50,4 @@ public class DiscogsSearchResponse {
 
         return discogsResultDTOList;
     }
-
-
-//    @Data
-//    class Community{
-//        private int want;
-//        private int have;
-//    }
-//    @Data
-//    class Format{
-//        private String name;
-//        private String qty;
-//        private String text;
-//        private ArrayList<String> descriptions;
-//    }
-//    @Data
-//    class Pagination{
-//        private int page;
-//        private int pages;
-//        private int perPage;
-//        private int items;
-//    }
-//    @Data
-//    class Result{
-//        private String country;
-//        private ArrayList<String> genre;
-//        private ArrayList<String> format;
-//        private ArrayList<Object> style;
-//        private int id;
-//        private ArrayList<String> label;
-//        private String type;
-//        private ArrayList<String> barcode;
-//        private int masterId;
-//        private String masterUrl;
-//        private String uri;
-//        private String catno;
-//        public String title;
-//        private String thumb;
-//        private String coverImage;
-//        private String resourceUrl;
-//        private Community community;
-//        private int formatQuantity;
-//        private ArrayList<String> formats;
-//
-//    }
 }

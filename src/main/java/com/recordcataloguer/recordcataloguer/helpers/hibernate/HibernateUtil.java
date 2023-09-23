@@ -1,7 +1,7 @@
-package com.recordcataloguer.recordcataloguer.database.hibernate;
+package com.recordcataloguer.recordcataloguer.helpers.hibernate;
 
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Community;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Community;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.entity.TestEnt;
 import lombok.SneakyThrows;
@@ -11,7 +11,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +67,7 @@ public class HibernateUtil {
         List<AlbumEntity> allFilteredAlbums = albums
                 .stream()
                 .filter(a -> !Objects.equals(a.getCatno(), ""))
-                .map(album -> AlbumEntity.buildAlbumEntityFromAlbum(album))
+                .map(AlbumEntity::buildAlbumEntityFromAlbum)
                 .collect(Collectors.toList());
 
         return allFilteredAlbums;
@@ -116,26 +115,8 @@ public class HibernateUtil {
 
     private static Session getSession() {
         if(session != null) return session;
-        return buildSessionFactory().getCurrentSession();
-    }
 
-    private static Properties getProperties() throws IOException {
-        Properties properties = new Properties();
-        // todo: Figure out how to use current thread so the file path is right. I think it's using the parent thread which is the root directory path to target/classes
-        URL propertiesURL = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(StringUtils.defaultString(PROPERTY_FILE_NAME, "hibernate.properties"));
-//        URL propertiesURL = new URL("file:../../../../../../../main/resources/hibernate.properties");
-        try {
-            assert propertiesURL != null;
-            try (FileInputStream inputStream = new FileInputStream(propertiesURL.getFile())) {
-                properties.load(inputStream);
-            }
-        }
-        catch (NullPointerException ex){
-            log.info("Error creating Hibernate Properties {}", ex.getMessage());
-        }
-        return properties;
+        return buildSessionFactory().getCurrentSession();
     }
 
     // MetadataSources is used to tell Hibernate what your entities are???
@@ -161,6 +142,25 @@ public class HibernateUtil {
 
     /***************************************************************************/
     /*******TODO: UNIMPLEMENTED Using the default hibernate.cfg.xml file********/
+    private static Properties getProperties() throws IOException {
+        Properties properties = new Properties();
+        // todo: Figure out how to use current thread so the file path is right. I think it's using the parent thread which is the root directory path to target/classes
+        URL propertiesURL = Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(StringUtils.defaultString(PROPERTY_FILE_NAME, "hibernate.properties"));
+//        URL propertiesURL = new URL("file:../../../../../../../main/resources/hibernate.properties");
+        try {
+            assert propertiesURL != null;
+            try (FileInputStream inputStream = new FileInputStream(propertiesURL.getFile())) {
+                properties.load(inputStream);
+            }
+        }
+        catch (NullPointerException ex){
+            log.info("Error creating Hibernate Properties {}", ex.getMessage());
+        }
+        return properties;
+    }
+
     public static void getConfigFile() {
         Configuration configuration = new Configuration();
         String path = "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties";

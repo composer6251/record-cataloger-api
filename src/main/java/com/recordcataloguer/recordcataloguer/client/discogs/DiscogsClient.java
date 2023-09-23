@@ -1,8 +1,8 @@
 package com.recordcataloguer.recordcataloguer.client.discogs;
 
 import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

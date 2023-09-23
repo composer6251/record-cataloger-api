@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.dto.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs.request;
 
 import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.constants.auth.OAuthRequestConstants;

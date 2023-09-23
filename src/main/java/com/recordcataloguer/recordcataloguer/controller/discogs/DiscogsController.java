@@ -1,8 +1,9 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
+import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsServiceMobile;
 import lombok.NonNull;
@@ -20,7 +21,7 @@ import java.util.Optional;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = {"http://10.116.244.134", "http://localhost:3000"}) // Allow from Flutter app
+@CrossOrigin(origins = { LocalHostUrls.LAPTOP_IP, LocalHostUrls.FLUTTER_EMULATOR }) // Allow from Flutter app
 public class DiscogsController {
 
     @Autowired

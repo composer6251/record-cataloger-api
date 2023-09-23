@@ -1,26 +1,23 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.google.cloud.vision.v1.EntityAnnotation;
-import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
 import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
-import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
+import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.dto.discogs.request.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.dto.discogs.PriceSuggestionResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
 import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

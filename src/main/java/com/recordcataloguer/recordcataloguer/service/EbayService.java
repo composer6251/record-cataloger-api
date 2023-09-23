@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-//
+
+/***
+ * Ebay Service for interacting with the Ebay Feign client
+ */
 @Service
 @Slf4j
 public class EbayService {

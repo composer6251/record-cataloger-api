@@ -1,6 +1,6 @@
 package com.recordcataloguer.recordcataloguer.entity;
 
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

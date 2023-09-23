@@ -2,8 +2,7 @@ package com.recordcataloguer.recordcataloguer.helpers.discogs;
 
 import com.google.cloud.vision.v1.BoundingPoly;
 import com.google.cloud.vision.v1.EntityAnnotation;
-import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
+import com.recordcataloguer.recordcataloguer.dto.discogs.request.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.dto.vision.AlbumAnnotation;
 import lombok.extern.slf4j.Slf4j;
 

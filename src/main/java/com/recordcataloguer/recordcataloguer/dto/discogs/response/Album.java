@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.dto.discogs;
+package com.recordcataloguer.recordcataloguer.dto.discogs.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

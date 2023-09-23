@@ -7,6 +7,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/***
+ * This class is responsible for creating and closing connection to database.
+ * Not using Hibernate.
+ * TODO: Leaving for now, but may remove in the future
+ */
 @Slf4j
 public class DatabaseHelper {
 
@@ -19,15 +24,15 @@ public class DatabaseHelper {
         connection.close();
         log.info("Connection to DB closed for DB connection {}", connection.getClientInfo());
     }
+
     private static Connection establishDBConnection(String username, String password) throws SQLException {
         String url = "jdbc:postgresql://localhost:5432/postgres";
         Properties props = new Properties();
         props.setProperty("user", username);
         props.setProperty("password", password);
         props.setProperty("ssl", "true");
-        Connection connection = DriverManager.getConnection(url, props);
 
-        return connection;
+        return DriverManager.getConnection(url, props);
     }
 
 }

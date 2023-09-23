@@ -19,6 +19,4 @@ public class AlbumAnnotation {
     private int thirdXVert;
     private int fourthXVert;
 
-//    private int firstYVert;
-
 }

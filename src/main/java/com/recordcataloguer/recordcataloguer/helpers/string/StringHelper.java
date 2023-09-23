@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 @Slf4j
 public class StringHelper {
 
-
     public static final String getSubstringParam(String url, String textBeginning, String textEnd) {
         StringBuilder dataWithEnd = new StringBuilder(url);
         dataWithEnd = dataWithEnd.append("EnD");
@@ -16,5 +15,4 @@ public class StringHelper {
 
         return releaseId;
     }
-
 }
