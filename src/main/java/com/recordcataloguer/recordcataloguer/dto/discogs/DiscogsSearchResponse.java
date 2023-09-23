@@ -30,7 +30,7 @@ public class DiscogsSearchResponse {
                     .wantedBy((double) album.getCommunity().getHave())
                     .genre(album.getGenre())
                     .style(album.getStyle())
-                    .id(album.getId())
+                    .id(album.getReleaseId())
                     .type(album.getType())
                     .inMyOwnedList(album.getCommunity().getHave())
                     .inMyWantList(album.getCommunity().getWant())

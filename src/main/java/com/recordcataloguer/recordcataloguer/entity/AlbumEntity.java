@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 
+/***
+ * Entity class for album table.
+ */
+
 @Entity
 @Table(name = "album", schema = "discogs")
 @NoArgsConstructor
@@ -21,7 +25,7 @@ public class AlbumEntity {
     @Column(name = "id")
     private int id;
     @Column(name = "discogs_release_id")
-    private int discogsReleaseId;
+    private String discogsReleaseId;
     @Column(name = "title")
     private String title;
     @Column(name = "country")
@@ -64,7 +68,7 @@ public class AlbumEntity {
                 .catno(album.getCatno())
                 .title(album.getTitle())
                 .country(album.getCountry())
-                .discogsReleaseId(album.getId())
+                .discogsReleaseId(album.getReleaseId())
                 .genre(album.getGenre())
                 .format(album.getFormat())
                 .style(album.getStyle())

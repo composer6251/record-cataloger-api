@@ -32,5 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 /src/main/resources/*
-/src/main/java/com/recordcataloguer/recordcataloguer/auth/DiscogsTokens.java
-/src/main/java/com/recordcataloguer/recordcataloguer/auth/*
+/src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DiscogsTokens.java
+/src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DatabaseCreds.java
+/src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DiscogsUserCredentials.java
+/src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/*

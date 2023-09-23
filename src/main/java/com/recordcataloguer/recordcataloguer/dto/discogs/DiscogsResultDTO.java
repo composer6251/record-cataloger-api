@@ -19,7 +19,7 @@ public class DiscogsResultDTO {
         private ArrayList<String> genre;
         private ArrayList<String> format;
         private ArrayList<Object> style;
-        private int id;
+        private String id;
         private ArrayList<String> label;
         private String type;
         private ArrayList<String> barcode;

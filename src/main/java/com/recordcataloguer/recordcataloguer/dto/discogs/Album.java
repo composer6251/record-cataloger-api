@@ -13,6 +13,8 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Album {
+    @JsonProperty("id")
+    private String releaseId;
     @JsonProperty("title")
     private String title;
     @JsonProperty("country")
@@ -23,8 +25,6 @@ public class Album {
     private ArrayList<String> format;
     @JsonProperty("style")
     private ArrayList<Object> style;
-    @JsonProperty("id")
-    private int id;
     @JsonProperty("label")
     private ArrayList<String> label;
     @JsonProperty("type")
@@ -64,7 +64,7 @@ public class Album {
         this.genre = albumToCopy.genre;
         this.format = albumToCopy.format;
         this.style = albumToCopy.style;
-        this.id = albumToCopy.id;
+        this.releaseId = albumToCopy.releaseId;
         this.label = albumToCopy.label;
         this.type = albumToCopy.type;
         this.barcode = albumToCopy.barcode;

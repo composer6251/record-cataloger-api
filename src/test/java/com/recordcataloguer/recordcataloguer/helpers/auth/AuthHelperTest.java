@@ -1,6 +1,6 @@
 package com.recordcataloguer.recordcataloguer.helpers.auth;
 
-import com.recordcataloguer.recordcataloguer.dto.discogs.OAuth;
+import com.recordcataloguer.recordcataloguer.dto.discogs.OAuthRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -11,10 +11,10 @@ public class AuthHelperTest {
     @Test
     public void generateAuthorizationHeaderShouldWork() {
 
-        OAuth oAuth = new OAuth();
+        OAuthRequest oAuthRequest = new OAuthRequest();
 
         Map<String, String> authorizationHeader = new HashMap<>();
-        authorizationHeader.put("OAuth oauth_consumer_key=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("OAuth oauth_consumer_key=", oAuthRequest.getOauth_consumer_key());
         System.out.println("authHeader " + authorizationHeader);
     }
 }

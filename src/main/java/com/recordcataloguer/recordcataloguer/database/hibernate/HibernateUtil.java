@@ -1,11 +1,13 @@
 package com.recordcataloguer.recordcataloguer.database.hibernate;
 
+import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Community;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.entity.TestEnt;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -19,7 +21,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class HibernateUtil {
@@ -40,41 +45,60 @@ public class HibernateUtil {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    private static String PROPERTY_FILE_NAME = "images/hibernate.properties";
+    private static SessionFactory sessionFactory;
+    private static Session session;
 
-    // Public method to call buildSessionFactory
-    public static SessionFactory getSessionFactory() {
-        ServiceRegistry serviceRegistry = null;
-        try {
-            serviceRegistry = configureServiceRegistry();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private static String PROPERTY_FILE_NAME = "hibernate.properties";
 
-//        if(serviceRegistry == null) throw new HibernateException("");
-
-        return makeSessionFactory(serviceRegistry);
+    /***
+     * Controller method to build session factory, session, and persist albums to DB
+     * @param albums
+     * @return void
+     * @throws IOException
+     */
+    public static void persistAlbumsToDBController(List<Album> albums) {
+        // Get session from sessionFactory
+        Session session = getSession();
+        List<AlbumEntity> albumEntities = buildEntitiesFromAlbums(albums);
+        // Pass albums to method that will persist them to DB
+        persistAlbumsToDB(albumEntities);
     }
 
-    public static SessionFactory getSessionFactoryXml() {
+    public static List<AlbumEntity> buildEntitiesFromAlbums(List<Album> albums) {
+        List<AlbumEntity> allFilteredAlbums = albums
+                .stream()
+                .filter(a -> !Objects.equals(a.getCatno(), ""))
+                .map(album -> AlbumEntity.buildAlbumEntityFromAlbum(album))
+                .collect(Collectors.toList());
+
+        return allFilteredAlbums;
+    }
+
+    private static void persistAlbumsToDB(List<AlbumEntity> albums) {
+        session.beginTransaction();
+
+        albums.forEach(r -> {
+            try {
+                session.persist(r);
+            } catch (Exception exception) {
+                log.error("Error inserting record {} {} \n {}", r.getCatno(), r.getTitle(), exception.getMessage());
+            }
+        });
+        session.getTransaction().commit();
+
+        shutdown();
+    }
+
+    private static SessionFactory getSessionFactoryXml() {
         return buildSessionFactory();
     }
 
-    public static void getConfigFile() {
-        Configuration configuration = new Configuration();
-        String path = "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties";
-//        Resource resource = resourceLoader.getResource(path);
-
-        configuration.configure(new File(
-                "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties"
-        ));
-        log.info("");
-    }
 
     @SneakyThrows
     private static SessionFactory buildSessionFactory() {
+        if(sessionFactory != null) return sessionFactory;
         try {
-            // Create the SessionFactory from hibernate.cfg.xml
+            // Create the SessionFactory from hibernate.cfg.xml, and add annotated classes
             SessionFactory sessionFactory =  new Configuration()
                     .configure("hibernate.cfg.xml")
                     .addAnnotatedClass(TestEnt.class)
@@ -88,6 +112,11 @@ public class HibernateUtil {
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
+    }
+
+    private static Session getSession() {
+        if(session != null) return session;
+        return buildSessionFactory().getCurrentSession();
     }
 
     private static Properties getProperties() throws IOException {
@@ -109,12 +138,6 @@ public class HibernateUtil {
         return properties;
     }
 
-    private static ServiceRegistry configureServiceRegistry() throws IOException {
-        Properties properties = getProperties();
-        return new StandardServiceRegistryBuilder().applySettings(properties)
-                .build();
-    }
-
     // MetadataSources is used to tell Hibernate what your entities are???
     private static SessionFactory makeSessionFactory(ServiceRegistry serviceRegistry) {
         MetadataSources metadataSources = new MetadataSources(serviceRegistry);
@@ -130,4 +153,45 @@ public class HibernateUtil {
         return metadata.getSessionFactoryBuilder()
                 .build();
     }
+
+    public static void shutdown() {
+        // Close caches and connection pools
+        session.close();
+    }
+
+    /***************************************************************************/
+    /*******TODO: UNIMPLEMENTED Using the default hibernate.cfg.xml file********/
+    public static void getConfigFile() {
+        Configuration configuration = new Configuration();
+        String path = "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties";
+//        Resource resource = resourceLoader.getResource(path);
+
+        configuration.configure(new File(
+                "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties"
+        ));
+    }
+
+//    private static ServiceRegistry configureServiceRegistry() throws IOException {
+//        Properties properties = getProperties();
+//        return new StandardServiceRegistryBuilder().applySettings(properties)
+//                .build();
+//    }
+//
+//    /***
+//     * Function to get session factory
+//     * @return
+//     */
+//    private static SessionFactory getSessionFactory() {
+//        ServiceRegistry serviceRegistry = null;
+//        try {
+//            serviceRegistry = configureServiceRegistry();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+////        if(serviceRegistry == null) throw new HibernateException("");
+//
+//        return makeSessionFactory(serviceRegistry);
+//    }
+
 }

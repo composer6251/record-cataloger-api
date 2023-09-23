@@ -1,3 +1,21 @@
+## ENVIROMENT SETUP
+### Used Spring Initializer for application setup
+
+### Used Maven for dependency management
+
+### Hibernate for ORM
+
+### Postgres for DB
+
+### Docker for containerization
+#### https://docs.docker.com/get-started/docker_cheatsheet.pdf
+#### Images: Standalone, executable package of software that includes everything needed to run an application:
+#### code, runtime, system tools, system libraries and settings.
+
+
+
+
+
 #Application designed originally to be a means of cataloguing record collections based upon the record catalogue number (usually on the side of the album cover)
 ##It takes an image passed into it and extracts the text from it
 ##Then it uses regexs to determine which text is the catalogue number
@@ -86,7 +104,7 @@ Add spring.cloud.gcp.credentials.location=file:/path/to/file.json to application
 ### CATALOG NUMBERS
 
 #### BY COUNTRY
-The "R" often stands for "Recordds" and the preceeding letters are the record label name
+The "R" often stands for "Records" and the preceeding letters are the record label name
 Does the "V" also stand for "Vinyl"
 Are they always capital letters? The catnos?
 Start with "ELV002" format since it's the least likely to be a false positive

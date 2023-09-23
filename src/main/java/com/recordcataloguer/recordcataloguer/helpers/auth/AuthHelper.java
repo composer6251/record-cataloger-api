@@ -1,9 +1,9 @@
 package com.recordcataloguer.recordcataloguer.helpers.auth;
 
 import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
-import com.recordcataloguer.recordcataloguer.helpers.http.HttpHelper;
-import com.recordcataloguer.recordcataloguer.helpers.http.HttpUtil;
-import com.recordcataloguer.recordcataloguer.dto.discogs.OAuth;
+import com.recordcataloguer.recordcataloguer.helpers.httpclienthelper.HttpHelper;
+import com.recordcataloguer.recordcataloguer.helpers.httpclienthelper.HttpUtil;
+import com.recordcataloguer.recordcataloguer.dto.discogs.OAuthRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.http.HttpRequest;
@@ -18,17 +18,16 @@ public class AuthHelper {
     private static String accessTokenAuthHeader;
     private static String userActionAuthHeader;
 
-
     public static final String generateOAuthHeaderForOAuthTokenRequest() {
         if(!userActionAuthHeader.isBlank()) return userActionAuthHeader;
 
-        OAuth oAuth = new OAuth();
+        OAuthRequest oAuthRequest = new OAuthRequest();
 
-        String auth = "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
-                "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
-                "oauth_signature=\"" + oAuth.getOauth_signature() + "\", " +
+        String auth = "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
+                "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
+                "oauth_signature=\"" + oAuthRequest.getOauth_signature() + "\", " +
                 "oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
+                "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
 //                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
         userActionAuthHeader = auth;
@@ -38,16 +37,16 @@ public class AuthHelper {
     public static final String generateOAuthHeaderForAccessTokenRequest(String oAuthToken, String oAuthTokenSecret) {
         if(!accessTokenAuthHeader.isBlank()) return accessTokenAuthHeader;
 
-        OAuth oAuth = new OAuth();
+        OAuthRequest oAuthRequest = new OAuthRequest();
 
         String auth =
-                "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
-                "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
+                "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
+                "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
                 "oauth_token=\"" + oAuthToken + "\", " +
-                "oauth_signature=\"" + oAuth.getOauth_signature() + oAuthTokenSecret + "\", " +
-                "oauth_verifier=\"" + oAuth.getOauth_verifier() + "\", " +
+                "oauth_signature=\"" + oAuthRequest.getOauth_signature() + oAuthTokenSecret + "\", " +
+                "oauth_verifier=\"" + oAuthRequest.getOauth_verifier() + "\", " +
                 "oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
+                "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
 //                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
         accessTokenAuthHeader = auth;
@@ -56,29 +55,29 @@ public class AuthHelper {
 
     public static String generateAuthorizationForUserActions(String oAuthToken, String oAuthTokenSecret) {
 
-        OAuth oAuth = new OAuth();
+        OAuthRequest oAuthRequest = new OAuthRequest();
 
         String auth =
-                "OAuth oauth_consumer_key=\"" + oAuth.getOauth_consumer_key() + "\", " +
-                        "oauth_nonce=\"" + oAuth.getOauth_nonce() + "\", " +
+                "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
+                        "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
                         "oauth_token=\"" + oAuthToken + "\", " +
-                        "oauth_signature=\"" + oAuth.getOauth_signature() +  oAuthTokenSecret + "\", " +
+                        "oauth_signature=\"" + oAuthRequest.getOauth_signature() +  oAuthTokenSecret + "\", " +
                         "oauth_signature_method=\"PLAINTEXT\", " +
-                        "oauth_timestamp=\"" + oAuth.getOauth_timestamp() + "\"";// +
+                        "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
         return auth;
 
     }
 
     // TODO: This won't work with feign. Each map entry is seen as it's own header and authorization is a single header.
     public static Map<String, String> getOAuthHeaderMap(){
-        OAuth oAuth = new OAuth();
+        OAuthRequest oAuthRequest = new OAuthRequest();
 
         Map<String, String> authorizationHeader = new HashMap<>();
-        authorizationHeader.put("OAuth oauth_consumer_key=", oAuth.getOauth_consumer_key());
-        authorizationHeader.put("oauth_nonce=", oAuth.getOauth_consumer_key());
-        authorizationHeader.put("oauth_signature=", oAuth.getOauth_consumer_key());
-        authorizationHeader.put("oauth_signature_method=", oAuth.getOauth_consumer_key());
-        authorizationHeader.put("oauth_timestamp=", oAuth.getOauth_consumer_key());
+        authorizationHeader.put("OAuth oauth_consumer_key=", oAuthRequest.getOauth_consumer_key());
+        authorizationHeader.put("oauth_nonce=", oAuthRequest.getOauth_consumer_key());
+        authorizationHeader.put("oauth_signature=", oAuthRequest.getOauth_consumer_key());
+        authorizationHeader.put("oauth_signature_method=", oAuthRequest.getOauth_consumer_key());
+        authorizationHeader.put("oauth_timestamp=", oAuthRequest.getOauth_consumer_key());
 
         log.info("authHeader", authorizationHeader);
 

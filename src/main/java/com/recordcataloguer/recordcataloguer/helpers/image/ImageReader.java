@@ -4,6 +4,7 @@ import com.google.cloud.vision.v1.*;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
 import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
@@ -60,7 +61,8 @@ public class ImageReader {
 
     public List<EntityAnnotation> getVisionEntityAnnotations(String imageUrl) {
         AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
-
+        AnnotateImageResponse test = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.IMAGE_PROPERTIES);
+//        ImageContextOrBuilder imageContext = new I
         return new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
     }
 
@@ -71,12 +73,16 @@ public class ImageReader {
         return annotateImageResponse.getTextAnnotationsList().get(0).getDescription();
     }
 
-    public String extractTextFromImage(String imageURL) {
+    public List<String> splitRawVisionText(String text) {
+        return Arrays.asList(StringUtils.split(text, "\n"));
+    }
+
+    public String extractTextFromImage(String imageURL, int separatorDistance) {
         AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageURL), Feature.Type.TEXT_DETECTION);
         // List must be mutable in order to remove matched annotations
         List<EntityAnnotation> annotations = new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
 
-        DiscogsServiceHelper.getSearchStringsByImageVertices(annotations);
+        DiscogsServiceHelper.getSearchStringsByImageVertices(annotations, separatorDistance);
         DiscogsServiceHelper.getNextAlbumAnnotations(annotations);
 
         DiscogsServiceHelper.getAlbumsForLookup(annotations, 10);

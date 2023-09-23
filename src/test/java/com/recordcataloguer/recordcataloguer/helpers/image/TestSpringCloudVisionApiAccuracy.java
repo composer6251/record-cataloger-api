@@ -34,7 +34,7 @@ public class TestSpringCloudVisionApiAccuracy {
     public static void extractTextFromImage(){
         ImageReader imageReader = new ImageReader();
 
-        System.out.println(imageReader.extractTextFromImage("src/test/resources/lovenotes/Note1.jpeg"));
+        System.out.println(imageReader.extractTextFromImage("src/test/resources/lovenotes/Note1.jpeg", 0));
     }
 //    public static void imageReaderShouldAccuratelyExtractTextFromAllImages() throws IOException {
 //
@@ -57,7 +57,7 @@ public class TestSpringCloudVisionApiAccuracy {
 //        List<String> successfulImages = new ArrayList<>();
         ImageReader imageReader = new ImageReader();
 //        ModelAndView modelAndView = new ModelAndView();
-        System.out.println(imageReader.extractTextFromImage("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg"));
+        System.out.println(imageReader.extractTextFromImage("/Users/david/Coding Projects/record-cataloguer-api/src/test/resources/images/20221017_163141.jpg", 0));
 
 
     }

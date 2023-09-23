@@ -4,6 +4,7 @@ import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
+import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsServiceMobile;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +35,47 @@ public class DiscogsController {
     @Autowired
     private ImageReader imageReader;
 
-    @GetMapping(value = "/getRecordsBySpineText")
-    public ResponseEntity<List<Album>> getRecordsBySpineText(@RequestParam @NonNull String url) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecordsBySpineText(url);
+    @Autowired
+    private DiscogsServiceMobile discogsServiceMobile;
+
+    /**************************GET ENDPOINTS*************************/
+
+    @GetMapping(value = "/getAlbumsByCatalogNumberFromMobile")
+    public ResponseEntity<List<Album>> getAlbumsByCatalogNumberFromMobile(@RequestParam String catalogNumber) {
+        log.debug("Request received to getRecordsByCatNoMobile by catNo: {}", catalogNumber);
+        List<Album> albums = discogsServiceMobile.getRecordsByCatalogNumber(catalogNumber);
+        log.debug("Response returned with {} albums", albums.size());
+        albums.forEach(album -> log.debug("Album: {} {}", album.getTitle(), album.getReleaseId()));
         return new ResponseEntity(albums, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getRecordsBySpineText")
+    public ResponseEntity<List<Album>> getRecordsBySpineText(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Album> albums = discogsService.getRecordsBySpineText(url, separatorDistance);
+        return new ResponseEntity(albums, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getImageTextForUser")
+    public ResponseEntity<List<String>> getImageTextForUser(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        String results = discogsService.extractTextFromImage(url);
+        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getRecordsFromRawText")
+    public ResponseEntity<List<String>> getRecordsFromRawText(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        String results = discogsService.extractTextFromImage(url);
+        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getSearchStringsByImageVerticesUrl")
+    public ResponseEntity<List<String>> getSearchStringsByImageVerticesUrl(@RequestParam @NonNull String url, @RequestParam String separatorDistance) {
+
+        log.debug("Request received to getSearchStringsByImageVerticesUrl with imageUrl: {}", url);
+        List<String> results = discogsService.getSearchStringsByImageVerticesUrl(url, Integer.parseInt(separatorDistance));
+        return new ResponseEntity(results, HttpStatus.OK);
     }
 
     @GetMapping(value = "/getRecordsByRegex")
@@ -56,22 +93,33 @@ public class DiscogsController {
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 
+    @GetMapping(
+            value = "/getRecordThumbnailsByImage",
+            produces = MediaType.IMAGE_GIF_VALUE
+    )
+    public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Album> albums = discogsService.getRecordsBySpineText(url, separatorDistance);
+        return new ResponseEntity(albums, HttpStatus.OK);
+    }
+
+    /**************************PUBLISH ENDPOINTS*************************/
+    @PostMapping(value = "/publishAlbumUncategorized")
+    public ResponseEntity<String> publishAlbum(@RequestParam @NonNull String releaseId, @RequestParam int folderId) {
+        log.debug("Request received to publish album with releaseId: {}", releaseId);
+
+        HttpStatus response = discogsServiceMobile.publishAlbumToUserCollection(releaseId, folderId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    /**************************AUTH ENDPOINTS*************************/
     @GetMapping(value = "/authenticate")
     public String authenticate() {
         log.debug("Request received to authenticate User with Discogs");
         return discogsService.getAuthorizationUrl();
     }
 
-    @GetMapping(
-            value = "/getRecordThumbnailsByImage",
-            produces = MediaType.IMAGE_GIF_VALUE
-    )
-    public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecordsBySpineText(url);
-        return new ResponseEntity(albums, HttpStatus.OK);
-    }
-
+    /**************************EXTRACT TEXT ENDPOINTS*************************/
     @GetMapping("/extractTextFromImage")
     public String extractTextFromImage(@RequestParam @NonNull String url) {
         log.error("Request received to lookup records from Discogs with imageUrl: {}", url);

@@ -1,7 +1,8 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.google.cloud.vision.v1.EntityAnnotation;
-import com.recordcataloguer.recordcataloguer.auth.DiscogsTokens;
+import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
+import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.database.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
@@ -9,7 +10,6 @@ import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
 import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
-import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
 import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchResponse;
@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO;
 import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO_SIX_AND_GREATER;
 
 @Service
@@ -53,34 +52,43 @@ public class DiscogsService {
         return imageReader.extractRawVisionText(url);
     }
 
-    public List<Album> getRecordsByRegex(String imageUrl) {
-        log.info("received request to getRecords by imageUrl");
+    public List<String> splitRawText(String text){
 
-        List<Album> albums = getRecordsByCatNo(imageUrl);
+        return imageReader.splitRawVisionText(text);
+    }
+
+    public String filterImageTextForUser(String url){
+
+        return imageReader.extractRawVisionText(url);
+    }
+
+    public List<String> getSearchStringsByImageVerticesUrl(String url, int separatorDistance){
+        List<EntityAnnotation> annotations = imageReader.getVisionEntityAnnotations(url);
+        List<String> results = DiscogsServiceHelper.getSearchStringsByImageVertices(annotations, separatorDistance);
+
+        return results;
+
+    }
+
+    public List<Album> getRecordsByRegex(String imageUrl) {
+        log.info("received request to getRecordsByRegex with imageUrl {}", imageUrl);
+
+        List<Album> albums = getRecordsByImageUrl(imageUrl);
 
         List<Album> albumsWithPricing = getPriceSuggestions(albums);
 
         return albumsWithPricing;
     }
 
-    public List<Album> getRecordsBySpineText(String imageUrl) {
-        log.info("received request to getRecords by imageUrl");
+    public List<Album> getRecordsBySpineText(String imageUrl, int separatorDistance) {
+        log.info("received request to getRecordsBySpineText with imageUrl {}", imageUrl);
 
-        List<Album> discogsSearchResponse = getRecordsByAlbumSpineText(imageUrl);
+        List<Album> discogsSearchResponse = getRecordsByAlbumSpineText(imageUrl, separatorDistance);
 
         return discogsSearchResponse;
     }
 
-    public String uploadRelease() {
-        log.info("received request to retrieve user authorization URL");
-
-        String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
-        discogsClient.uploadAlbumReleaseToUncategorizedCollection(authHeader, "dfennell31@gmail.com", "1", "placeholder");
-        return authHeader;
-    }
-
-
-    public PriceSuggestionResponse getPriceSuggestions(int releaseId) throws FeignException {
+    public PriceSuggestionResponse getPriceSuggestions(String releaseId) throws FeignException {
         log.info("received request to getPriceSuggestions");
 
         String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
@@ -93,6 +101,7 @@ public class DiscogsService {
         log.info("received request to retrieve user authorization URL");
 
         Optional<String> url = AuthHelper.getOAuthToken();
+
         return url.orElse("");
     }
 
@@ -101,11 +110,11 @@ public class DiscogsService {
      * @param imageUrl
      * @return ResponseEntity of DiscogsResponse
      */
-    private List<Album> getRecordsByAlbumSpineText(String imageUrl) {
+    private List<Album> getRecordsByAlbumSpineText(String imageUrl, int separatorDistance) {
 
         /*****METHOD 1 Using AlbumNotation Objects, filtering based on initialXvert and YvertTotals*****/
         List<EntityAnnotation> annotations = imageReader.getVisionEntityAnnotations(imageUrl);
-        List<String> individualAlbumSpineTexts = DiscogsServiceHelper.getSearchStringsByImageVertices(annotations);
+        List<String> individualAlbumSpineTexts = DiscogsServiceHelper.getSearchStringsByImageVertices(annotations, separatorDistance);
         List<Album> albumsToReturn = new ArrayList<>();
         for (String text : individualAlbumSpineTexts) {
 
@@ -130,7 +139,7 @@ public class DiscogsService {
     }
 
     /****METHOD 2 using raw image texts and regexes******/
-    public List<Album> getRecordsByCatNo(String imageUrl) {
+    public List<Album> getRecordsByImageUrl(String imageUrl) {
         String visionRawText = extractTextFromImage(imageUrl);
 
         if(visionRawText.isEmpty()) return null;
@@ -146,7 +155,7 @@ public class DiscogsService {
     private List<Album> getRecordsBySearchRequest(List<DiscogsSearchAlbumRequest> albumRequests) {
 
         List<Album> albums = new ArrayList<>();
-        int i = 21;
+        int i = 41;
         for (DiscogsSearchAlbumRequest albumRequest : albumRequests) {
             i++;
             if(i % 20 == 0){
@@ -182,9 +191,10 @@ public class DiscogsService {
             albums.addAll(validatedAlbums);
         }
 
-        List<Album> validatedAlbums = albums.stream().filter(a -> a.getTitle() != null && a.getId() != 0).collect(Collectors.toList());
+        List<Album> validatedAlbums = albums.stream().filter(a -> a.getTitle() != null && (a.getReleaseId() != null || !a.getReleaseId().isEmpty())).collect(Collectors.toList());
         return validatedAlbums;
     }
+
 
     public List<Album> getPriceSuggestions(List<Album> albums) {
         List<Album> resultsWithPriceSuggestions = new ArrayList<>();
@@ -198,15 +208,15 @@ public class DiscogsService {
                 log.info("Exception sleeping thread {}", exception.getMessage());
             }
             try {
-                PriceSuggestionResponse priceSuggestionResponse = getPriceSuggestions(album.getId());
+                PriceSuggestionResponse priceSuggestionResponse = getPriceSuggestions(album.getReleaseId());
                 if(priceSuggestionResponse.getGood() != null) album.setAlbumGoodValue(priceSuggestionResponse.getGood().getValue());
                 if(priceSuggestionResponse.getMint() != null) album.setAlbumMintPlusValue(priceSuggestionResponse.getMint().getValue());
             }
             catch (FeignException feignException) {
-                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), feignException.getMessage());
+                log.info("Exception assiging album value to release {} and catno {} with message\n {}", album.getReleaseId(), album.getCatno(), feignException.getMessage());
             }
             catch (NullPointerException exception) {
-                log.info("Exception assigning album value to release {} and catno {} with message\n {}", album.getId(), album.getCatno(), exception.getMessage());
+                log.info("Exception assigning album value to release {} and catno {} with message\n {}", album.getReleaseId(), album.getCatno(), exception.getMessage());
             }
 
             resultsWithPriceSuggestions.add(album);
@@ -218,8 +228,6 @@ public class DiscogsService {
     @SneakyThrows
     public List<AlbumEntity> getAllDiscogsCatalogNumbers() {
 
-        SessionFactory sessionFactory = HibernateUtil.getSessionFactoryXml();
-        Session session = sessionFactory.openSession();
         DiscogsSearchResponse response = discogsClient.getAllDiscogsCatalogNumbers(token, format, 100);
         List<AlbumEntity> resultsToReturn = new ArrayList<>();
         AtomicReference<Long> failedTransactions = new AtomicReference<>(0L);
@@ -232,32 +240,14 @@ public class DiscogsService {
             }
             DiscogsSearchResponse resp = discogsClient.getNextDiscogsSearchResultPage(token, format, 100, i++);
 
-            List<AlbumEntity> allFilteredAlbums = resp.getAlbums()
-                    .stream()
-                    .filter(r -> !Objects.equals(r.getCatno(), ""))
-                    .map(album -> AlbumEntity.buildAlbumEntityFromAlbum(album))
-                    .collect(Collectors.toList());
+            HibernateUtil.buildEntitiesFromAlbums(resp.getAlbums());
+            HibernateUtil.persistAlbumsToDBController(resp.getAlbums());
 
-//            session.beginTransaction();
-//
-//            resultsToReturn.forEach(r -> {
-//                try {
-//                    session.persist(r);
-//
-//                } catch (Exception exception) {
-//                    log.error("Error inserting record {} {} \n {}", r.getCatno(), r.getTitle(), exception.getMessage());
-//                    failedTransactions.getAndSet(failedTransactions.get() + 1);
-//
-//                }
-//            });
-//            session.getTransaction().commit();
-////            session.flush();
-            resultsToReturn.addAll(allFilteredAlbums);
+            //resultsToReturn.addAll(allFilteredAlbums);
             log.info("resultsToReturn size {}", resultsToReturn.size());
 
         }
         log.info("Number of failed Record inserts {} and total results {}", failedTransactions, resultsToReturn);
-        session.close();
 
         return resultsToReturn;
     }

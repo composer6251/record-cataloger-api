@@ -1,3 +1,6 @@
+
+#Feign configuration file. This is NOT CURRENTLY BEING USED, BUT PLANS TO HAVE DIFFERENT CONFIG FILES FOR
+#DIFFERENT ENVIRONMENTS
 feign:
   client:
     config:

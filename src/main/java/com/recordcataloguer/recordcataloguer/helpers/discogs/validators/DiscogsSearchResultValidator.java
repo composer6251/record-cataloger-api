@@ -50,7 +50,15 @@ public class DiscogsSearchResultValidator {
         return searchResults.stream()
                 .filter(Objects::nonNull)
                 .filter(distinctByKey(Album::getTitle))
-                .filter(a -> a.getId() != 0)
+                .filter(a -> (a.getReleaseId() != null || a.getReleaseId().isEmpty()))
+                .collect(Collectors.toList());
+    }
+
+    // TODO: Fix or remove. Albums with the same catNo CAN BE DIFFERENT ALBUMS.
+    public static List<Album> getSingleExactCatalogNumberMatch(List<Album> searchResults, String scannedCatalogNumber) {
+        return searchResults.stream()
+                .filter(Objects::nonNull)
+                .filter(r -> r.getCatno().equalsIgnoreCase(scannedCatalogNumber))
                 .collect(Collectors.toList());
     }
 

@@ -2,6 +2,7 @@ package com.recordcataloguer.recordcataloguer.helpers.discogs;
 
 import com.google.cloud.vision.v1.BoundingPoly;
 import com.google.cloud.vision.v1.EntityAnnotation;
+import com.recordcataloguer.recordcataloguer.dto.discogs.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.dto.vision.AlbumAnnotation;
 import lombok.extern.slf4j.Slf4j;
@@ -32,23 +33,21 @@ public class DiscogsServiceHelper {
         List<DiscogsSearchAlbumRequest> albumsToSearch = new ArrayList<>();
         for (String text : textsFromAlbums) {
 
-            albumsToSearch.add(buildSingleRequest(text, regex));
+            albumsToSearch.add(buildSingleRequestFromRawText(text, regex));
 
         }
-            return albumsToSearch;
+        return albumsToSearch;
     }
     public static List<DiscogsSearchAlbumRequest> buildSearchRequestsFromRawText(String rawText, String regex) {
 
         List<DiscogsSearchAlbumRequest> albumsToSearch = new ArrayList<>();
 
-
-        albumsToSearch.add(buildSingleRequest(rawText, regex));
-
+        albumsToSearch.add(buildSingleRequestFromRawText(rawText, regex));
 
         return albumsToSearch;
     }
 
-    public static DiscogsSearchAlbumRequest buildSingleRequest(String rawText, String regex) {
+    public static DiscogsSearchAlbumRequest buildSingleRequestFromRawText(String rawText, String regex) {
 
         Pattern regexToUse = Pattern.compile(regex);
         Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(CAT_NO);
@@ -93,7 +92,6 @@ public class DiscogsServiceHelper {
 
     }
 
-
     private static int getConfidenceLevel(String maybeCatNo, String maybeTitle) {
         /**values to determine accuracy of search**/
         boolean maybeTitleHasMoreWhiteSpaces = StringUtils.countMatches(maybeTitle, StringUtils.SPACE) > StringUtils.countMatches(maybeCatNo, StringUtils.SPACE);
@@ -110,7 +108,7 @@ public class DiscogsServiceHelper {
         return confidenceLevel;
     }
     // TODO: CAN I DETERMINE FROM SPINETEXTS WHAT IS TITLE AND WHAT IS CATNO?
-    public static List<String> getSearchStringsByImageVertices(List<EntityAnnotation> annotations) {
+    public static List<String> getSearchStringsByImageVertices(List<EntityAnnotation> annotations, int separatorDistance) {
         List<AlbumAnnotation> albumAnnotations;
         annotations.sort(Comparator.comparing(a -> getVerticesTotal(a.getBoundingPoly(), 'X')));
         // Get album annotations with initial XVertex and totals for X and Y Vertices
@@ -136,7 +134,8 @@ public class DiscogsServiceHelper {
         StringBuilder stringBuilder = new StringBuilder();
 
         // Compare current and next albumAnnotation to determine if they belong on the same album spine
-        int separationDistance = 20;
+        int separator =  separatorDistance != 0 ? separatorDistance :  20;
+        log.debug("Separator Distance {}", separator);
         for (int i = 0; i < albumAnnotations.size() - 1; i++) {
             AlbumAnnotation current = albumAnnotations.get(i);
             AlbumAnnotation next = albumAnnotations.get(i + 1);
@@ -145,10 +144,10 @@ public class DiscogsServiceHelper {
             // TODO: Maybe option to specify number of records
             stringBuilder.append(" ").append(current.getDescription());
             // if the xVertices are too far apart, then they are likely on different album spines
-            boolean isSameAlbum = Math.abs(next.getFirstXVert() - current.getFirstXVert()) <= separationDistance
-                    || Math.abs(next.getSecondXVert() - current.getSecondXVert()) <= separationDistance
-                    || Math.abs(next.getThirdXVert() - current.getThirdXVert()) <= separationDistance
-                    || Math.abs(next.getFourthXVert() - current.getFourthXVert()) <= separationDistance;
+            boolean isSameAlbum = Math.abs(next.getFirstXVert() - current.getFirstXVert()) <= separator
+                    || Math.abs(next.getSecondXVert() - current.getSecondXVert()) <= separator
+                    || Math.abs(next.getThirdXVert() - current.getThirdXVert()) <= separator
+                    || Math.abs(next.getFourthXVert() - current.getFourthXVert()) <= separator;
             // If it's probably the same, we've already appended the description for current, move on to next iteration.
             // TODO: Compare EACH x vert and if ANY are within 30, then it's the same album
             if(isSameAlbum) {
