@@ -1,19 +1,19 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.google.cloud.vision.v1.EntityAnnotation;
-import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.request.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
-import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
+import com.recordcataloguer.recordcataloguer.helpers.image.vision.ImageReader;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
+import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.CAT_NO_SIX_AND_GREATER;
+import static com.recordcataloguer.recordcataloguer.helpers.regex.CatalogNumberRegex.CAT_NO_SIX_AND_GREATER;
 
 @Service
 @Slf4j
@@ -88,7 +88,7 @@ public class DiscogsService {
     public PriceSuggestionResponse getPriceSuggestions(String releaseId) throws FeignException {
         log.info("received request to getPriceSuggestions");
 
-        String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
+        String authHeader = DiscogsAuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
         PriceSuggestionResponse priceSuggestionsResponse = discogsClient.getPriceSuggestions(authHeader, releaseId);
 
         return priceSuggestionsResponse;
@@ -97,7 +97,7 @@ public class DiscogsService {
     public String getAuthorizationUrl() {
         log.info("received request to retrieve user authorization URL");
 
-        Optional<String> url = AuthHelper.getOAuthToken();
+        Optional<String> url = DiscogsAuthHelper.getOAuthToken();
 
         return url.orElse("");
     }
@@ -192,7 +192,6 @@ public class DiscogsService {
         return validatedAlbums;
     }
 
-
     public List<Album> getPriceSuggestions(List<Album> albums) {
         List<Album> resultsWithPriceSuggestions = new ArrayList<>();
         log.info("Getting price suggestions for {} albums", albums.size());
@@ -222,6 +221,12 @@ public class DiscogsService {
         return resultsWithPriceSuggestions;
     }
 
+    /***
+     * Gets ALL albums from Discogs that contain a catalog number, and persists them to the DB
+     * This was for research on catalog number format, and possibly for machine learning
+     * to be able to better identify catalog number formats
+     * @return List<AlbumEntity>
+     */
     @SneakyThrows
     public List<AlbumEntity> getAllDiscogsCatalogNumbers() {
 
@@ -237,7 +242,6 @@ public class DiscogsService {
             }
             DiscogsSearchResponse resp = discogsClient.getNextDiscogsSearchResultPage(token, format, 100, i++);
 
-            HibernateUtil.buildEntitiesFromAlbums(resp.getAlbums());
             HibernateUtil.persistAlbumsToDBController(resp.getAlbums());
 
             //resultsToReturn.addAll(allFilteredAlbums);
@@ -263,11 +267,11 @@ public class DiscogsService {
         return allFilteredAlbums;
     }
 
-
     public String verifyIdentity() {
         log.info("received request to verify user identity");
 
-        Optional<String> url = AuthHelper.getOAuthToken();
+        Optional<String> url = DiscogsAuthHelper.getOAuthToken();
+
         return url.orElse("");
     }
 }

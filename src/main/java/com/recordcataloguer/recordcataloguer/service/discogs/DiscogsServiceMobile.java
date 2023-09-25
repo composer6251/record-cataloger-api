@@ -1,14 +1,14 @@
 package com.recordcataloguer.recordcataloguer.service.discogs;
 
-import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
-import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsUserCredentials;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsUserCredentials;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
 import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.helpers.auth.AuthHelper;
+import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
 import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
 import feign.FeignException;
@@ -93,7 +93,7 @@ public class DiscogsServiceMobile {
         // If folderId is not specified, default is 1 (Uncategorized)
         if(folderId == 0) folderId = 1;
 
-        String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
+        String authHeader = DiscogsAuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
         HttpStatus publishResponse = discogsClient.uploadAlbumToCollection(authHeader, DiscogsUserCredentials.DISCOGS_USERNAME, folderId, releaseId);
 
         return publishResponse;
@@ -108,7 +108,7 @@ public class DiscogsServiceMobile {
     public PriceSuggestionResponse getPriceSuggestions(String releaseId) throws FeignException {
         log.info("received request to getPriceSuggestions");
 
-        String authHeader = AuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
+        String authHeader = DiscogsAuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
         PriceSuggestionResponse priceSuggestionsResponse = discogsClient.getPriceSuggestions(authHeader, releaseId);
 
         return priceSuggestionsResponse;
@@ -166,14 +166,14 @@ public class DiscogsServiceMobile {
     public String verifyIdentity() {
         log.info("received request to verify user identity");
 
-        Optional<String> url = AuthHelper.getOAuthToken();
+        Optional<String> url = DiscogsAuthHelper.getOAuthToken();
         return url.orElse("");
     }
 
     public String getAuthorizationUrl() {
         log.info("received request to retrieve user authorization URL");
 
-        Optional<String> url = AuthHelper.getOAuthToken();
+        Optional<String> url = DiscogsAuthHelper.getOAuthToken();
         return url.orElse("");
     }
 }

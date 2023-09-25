@@ -18,7 +18,7 @@ public class DiscogsResultDTO {
         private String country;
         private ArrayList<String> genre;
         private ArrayList<String> format;
-        private ArrayList<Object> style;
+        private ArrayList<String> style;
         private String id;
         private ArrayList<String> label;
         private String type;

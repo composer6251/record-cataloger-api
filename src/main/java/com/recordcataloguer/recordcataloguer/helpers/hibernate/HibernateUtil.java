@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.cfg.Configuration;
@@ -27,17 +28,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class HibernateUtil {
-    // Flow:
-    //  Spring looks at property files to get connection info
-    //  Tests connection to DB
-    // Configuration Options:
-    //  1. Add to application.properties file
-    //  2. Use default hibernate.cfg.xml (either create yourself or utilize the built in Configure.configure()....as shown in the first method
-    //  3. Create a custom file hibernate.properties(in this example) and add it as in last method
-    // SessionFactory to get Session which needs
-    // Properties which needs
-    // Service Registry
-    // MetaDataSources
 
     private HibernateUtil(){}
 
@@ -57,20 +47,19 @@ public class HibernateUtil {
      */
     public static void persistAlbumsToDBController(List<Album> albums) {
         // Get session from sessionFactory
-        Session session = getSession();
+        session = getSession();
         List<AlbumEntity> albumEntities = buildEntitiesFromAlbums(albums);
         // Pass albums to method that will persist them to DB
         persistAlbumsToDB(albumEntities);
     }
 
     public static List<AlbumEntity> buildEntitiesFromAlbums(List<Album> albums) {
-        List<AlbumEntity> allFilteredAlbums = albums
+
+        return albums
                 .stream()
                 .filter(a -> !Objects.equals(a.getCatno(), ""))
                 .map(AlbumEntity::buildAlbumEntityFromAlbum)
                 .collect(Collectors.toList());
-
-        return allFilteredAlbums;
     }
 
     private static void persistAlbumsToDB(List<AlbumEntity> albums) {
@@ -78,9 +67,12 @@ public class HibernateUtil {
 
         albums.forEach(r -> {
             try {
+                log.info("Inserting record {} {}", r.getCatno(), r.getTitle());
                 session.persist(r);
+                session.flush();
             } catch (Exception exception) {
                 log.error("Error inserting record {} {} \n {}", r.getCatno(), r.getTitle(), exception.getMessage());
+                exception.printStackTrace();
             }
         });
         session.getTransaction().commit();
@@ -88,23 +80,18 @@ public class HibernateUtil {
         shutdown();
     }
 
-    private static SessionFactory getSessionFactoryXml() {
-        return buildSessionFactory();
-    }
-
 
     @SneakyThrows
     private static SessionFactory buildSessionFactory() {
         if(sessionFactory != null) return sessionFactory;
+
         try {
             // Create the SessionFactory from hibernate.cfg.xml, and add annotated classes
-            SessionFactory sessionFactory =  new Configuration()
+            return new Configuration()
                     .configure("hibernate.cfg.xml")
                     .addAnnotatedClass(TestEnt.class)
                     .addAnnotatedClass(AlbumEntity.class)
                     .buildSessionFactory();
-
-            return sessionFactory;
         }
         catch (Exception  ex) {
             // Make sure you log the exception, as it might be swallowed
@@ -114,25 +101,10 @@ public class HibernateUtil {
     }
 
     private static Session getSession() {
-        if(session != null) return session;
+        // If there's an active sessionFactory, return the current session
+        if(sessionFactory != null) return sessionFactory.getCurrentSession();
 
-        return buildSessionFactory().getCurrentSession();
-    }
-
-    // MetadataSources is used to tell Hibernate what your entities are???
-    private static SessionFactory makeSessionFactory(ServiceRegistry serviceRegistry) {
-        MetadataSources metadataSources = new MetadataSources(serviceRegistry);
-
-        // Lazily add package if the .properties file is used as opposed to .xml file
-        metadataSources.addPackage("com.recordcataloguer.recordcataloguer.entity");
-        metadataSources.addAnnotatedClass(AlbumEntity.class);
-        metadataSources.addAnnotatedClass(Community.class);
-
-        Metadata metadata = metadataSources.getMetadataBuilder()
-                .build();
-
-        return metadata.getSessionFactoryBuilder()
-                .build();
+        return buildSessionFactory().openSession();
     }
 
     public static void shutdown() {
@@ -142,6 +114,10 @@ public class HibernateUtil {
 
     /***************************************************************************/
     /*******TODO: UNIMPLEMENTED Using the default hibernate.cfg.xml file********/
+    private static SessionFactory getSessionFactoryXml() {
+        return buildSessionFactory();
+    }
+
     private static Properties getProperties() throws IOException {
         Properties properties = new Properties();
         // todo: Figure out how to use current thread so the file path is right. I think it's using the parent thread which is the root directory path to target/classes
@@ -170,6 +146,23 @@ public class HibernateUtil {
                 "file:/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/hibernate.properties"
         ));
     }
+
+    // MetadataSources is used to tell Hibernate what your entities are???
+    private static SessionFactory makeSessionFactory(ServiceRegistry serviceRegistry) {
+        MetadataSources metadataSources = new MetadataSources(serviceRegistry);
+
+        // Lazily add package if the .properties file is used as opposed to .xml file
+        metadataSources.addPackage("com.recordcataloguer.recordcataloguer.entity");
+        metadataSources.addAnnotatedClass(AlbumEntity.class);
+        metadataSources.addAnnotatedClass(Community.class);
+
+        Metadata metadata = metadataSources.getMetadataBuilder()
+                .build();
+
+        return metadata.getSessionFactoryBuilder()
+                .build();
+    }
+
 
 //    private static ServiceRegistry configureServiceRegistry() throws IOException {
 //        Properties properties = getProperties();

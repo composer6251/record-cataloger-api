@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.helpers.encode;
+package com.recordcataloguer.recordcataloguer.helpers.image.encode;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

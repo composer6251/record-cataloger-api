@@ -1,6 +1,6 @@
 //package com.recordcataloguer.recordcataloguer.helpers.regex;
 //
-//import com.recordcataloguer.recordcataloguer.helpers.image.ImageReader;
+//import com.recordcataloguer.recordcataloguer.helpers.image.vision.ImageReader;
 //import org.apache.commons.lang3.StringUtils;
 //import org.junit.jupiter.api.Test;
 //

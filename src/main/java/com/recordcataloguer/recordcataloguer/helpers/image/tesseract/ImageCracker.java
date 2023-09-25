@@ -1,4 +1,4 @@
-//package com.recordcataloguer.recordcataloguer.helpers.tesseract;
+//package com.recordcataloguer.recordcataloguer.helpers.image.tesseract;
 //
 //import org.bytedeco.javacpp.*;
 //import static org.bytedeco.javacpp.lept.*;

@@ -3,11 +3,10 @@ package com.recordcataloguer.recordcataloguer.helpers.image;//package com.record
 import java.io.IOException;
 import java.util.*;
 
-import com.recordcataloguer.recordcataloguer.RecordCataloguerApplication;
+import com.recordcataloguer.recordcataloguer.helpers.image.vision.ImageReader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @SpringBootApplication(scanBasePackages={

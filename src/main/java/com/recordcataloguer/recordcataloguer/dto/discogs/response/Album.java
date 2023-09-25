@@ -24,7 +24,7 @@ public class Album {
     @JsonProperty("format")
     private ArrayList<String> format;
     @JsonProperty("style")
-    private ArrayList<Object> style;
+    private ArrayList<String> style;
     @JsonProperty("label")
     private ArrayList<String> label;
     @JsonProperty("type")

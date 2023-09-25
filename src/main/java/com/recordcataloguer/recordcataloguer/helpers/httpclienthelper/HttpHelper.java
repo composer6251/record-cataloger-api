@@ -22,12 +22,11 @@ public class HttpHelper {
     public static HttpRequest generateRequest(String uri, String authorization) {
 
         try {
-            HttpRequest request = HttpRequest.newBuilder()
+            return HttpRequest.newBuilder()
                     .uri(new URI(uri))
                     .header("Authorization", authorization)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build();
-            return request;
         }
         catch (URISyntaxException exception) {
             log.error("Error parsing URI while building HttpRequest for URI {}", exception.getMessage());
@@ -36,14 +35,15 @@ public class HttpHelper {
     }
 
     // Send request
-    public static HttpResponse sendRequest(HttpRequest request) {
+    public static HttpResponse<String> sendRequest(HttpRequest request) {
 
-        HttpResponse response = null;
+        HttpResponse<String> response = null;
         try {
             response = client.send(request, BodyHandlers.ofString());
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
+            log.error("Error sending request: " + e.getMessage());
             e.printStackTrace();
         }
 

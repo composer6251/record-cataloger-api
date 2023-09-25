@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
 import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
-import com.recordcataloguer.recordcataloguer.service.discogs.AuthService;
+import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsAuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,26 +13,26 @@ public class AuthController {
 
     // Autowired to use Feign
     @Autowired
-    private AuthService authService;
+    private DiscogsAuthService discogsAuthService;
 
     @GetMapping(value = "/authenticate/feign")
     public String authenticate() {
         log.debug("Request received to authenticate User with Discogs");
 
-        return authService.getAuthorizationUrlFeign();
+        return discogsAuthService.getAuthorizationUrlFeign();
     }
 
     @GetMapping(value = "/get-access-token")
     public String getAccessToken() {
         log.debug("Request received to authenticate User with Discogs");
 
-        return authService.getAccessTokenFeign();
+        return discogsAuthService.getAccessTokenFeign();
     }
 
     @GetMapping(value = "/verify-user-identity")
     public String verifyUserIdentity() {
         log.debug("Request received to authenticate User with Discogs");
 
-        return authService.verifyIdentity();
+        return discogsAuthService.verifyIdentity();
     }
 }

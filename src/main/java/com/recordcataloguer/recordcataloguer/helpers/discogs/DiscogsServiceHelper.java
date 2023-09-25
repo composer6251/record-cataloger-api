@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.VisionTextFiltering.*;
+import static com.recordcataloguer.recordcataloguer.helpers.regex.CatalogNumberRegex.*;
 
 @Slf4j
 public class DiscogsServiceHelper {
@@ -49,7 +49,7 @@ public class DiscogsServiceHelper {
     public static DiscogsSearchAlbumRequest buildSingleRequestFromRawText(String rawText, String regex) {
 
         Pattern regexToUse = Pattern.compile(regex);
-        Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(CAT_NO);
+        Pattern CAT_NO_WITHOUT_SPACE = Pattern.compile(ALPHA_NUMERIC_THEN_DIGITS);
 
         DiscogsSearchAlbumRequest albumRequest = new DiscogsSearchAlbumRequest();
         Matcher matchedText = regexToUse.matcher(rawText);

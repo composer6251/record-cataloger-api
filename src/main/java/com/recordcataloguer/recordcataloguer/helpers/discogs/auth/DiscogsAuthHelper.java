@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.helpers.auth;
+package com.recordcataloguer.recordcataloguer.helpers.discogs.auth;
 
 import com.recordcataloguer.recordcataloguer.constants.DiscogsUrls;
 import com.recordcataloguer.recordcataloguer.helpers.httpclienthelper.HttpHelper;
@@ -13,48 +13,44 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class AuthHelper {
+public class DiscogsAuthHelper {
 
     private static String accessTokenAuthHeader;
     private static String userActionAuthHeader;
 
-    public static final String generateOAuthHeaderForOAuthTokenRequest() {
+    public static String generateOAuthHeaderForOAuthTokenRequest() {
         if(!userActionAuthHeader.isBlank()) return userActionAuthHeader;
 
         OAuthRequest oAuthRequest = new OAuthRequest();
 
-        String auth = "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
+        userActionAuthHeader = "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
                 "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
                 "oauth_signature=\"" + oAuthRequest.getOauth_signature() + "\", " +
                 "oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
-//                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
+                "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";
+        //      ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
-        userActionAuthHeader = auth;
         return userActionAuthHeader;
     }
 
-    public static final String generateOAuthHeaderForAccessTokenRequest(String oAuthToken, String oAuthTokenSecret) {
+    public static String generateOAuthHeaderForAccessTokenRequest(String oAuthToken, String oAuthTokenSecret) {
         if(!accessTokenAuthHeader.isBlank()) return accessTokenAuthHeader;
 
         OAuthRequest oAuthRequest = new OAuthRequest();
 
-        String auth =
-                "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
-                "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
-                "oauth_token=\"" + oAuthToken + "\", " +
-                "oauth_signature=\"" + oAuthRequest.getOauth_signature() + oAuthTokenSecret + "\", " +
-                "oauth_verifier=\"" + oAuthRequest.getOauth_verifier() + "\", " +
-                "oauth_signature_method=\"PLAINTEXT\", " +
-                "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
-//                ", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
+        accessTokenAuthHeader = "OAuth oauth_consumer_key=\"" + oAuthRequest.getOauth_consumer_key() + "\", " +
+            "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\", " +
+            "oauth_token=\"" + oAuthToken + "\", " +
+            "oauth_signature=\"" + oAuthRequest.getOauth_signature() + oAuthTokenSecret + "\", " +
+            "oauth_verifier=\"" + oAuthRequest.getOauth_verifier() + "\", " +
+            "oauth_signature_method=\"PLAINTEXT\", " +
+            "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";
+            //", oauth_callback=\"" + oAuth.getOauth_callback() + "\"";
 
-        accessTokenAuthHeader = auth;
         return accessTokenAuthHeader;
     }
 
     public static String generateAuthorizationForUserActions(String oAuthToken, String oAuthTokenSecret) {
-
         OAuthRequest oAuthRequest = new OAuthRequest();
 
         String auth =
@@ -63,23 +59,20 @@ public class AuthHelper {
                         "oauth_token=\"" + oAuthToken + "\", " +
                         "oauth_signature=\"" + oAuthRequest.getOauth_signature() +  oAuthTokenSecret + "\", " +
                         "oauth_signature_method=\"PLAINTEXT\", " +
-                        "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";// +
+                        "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"";
+
         return auth;
     }
 
-
     public static Optional<String> getOAuthToken() {
-
         // Generate/Send Request
         HttpRequest resultHttp = HttpHelper.generateRequest(DiscogsUrls.REQUEST_TOKEN_URL, generateOAuthHeaderForOAuthTokenRequest());
         // TODO: Raw usage???
-        HttpResponse response;
+        HttpResponse<String> response;
         response = HttpHelper.sendRequest(resultHttp);
-        log.info("\n\n\nresponse from HttpHelper {}\n\n\n", response);
 
         // Extract OAuth Token from response and generate URL
         String authUrl = response.body() == null ? "" : HttpUtil.generateUserAuthorizationUrl(response.body().toString());
-        log.info("Returning Authorization Url {}", authUrl);
 
         return Optional.of(authUrl);
     }

@@ -35,7 +35,7 @@ public class AlbumEntity {
     @Column(name = "format")
     private ArrayList<String> format;
     @Column(name = "style")
-    private ArrayList<Object> style;
+    private ArrayList<String> style;
     @Column(name = "label")
     private ArrayList<String> label;
     @Column(name = "type")

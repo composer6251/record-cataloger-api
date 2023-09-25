@@ -1,8 +1,8 @@
 package com.recordcataloguer.recordcataloguer.service;
 
 import com.recordcataloguer.recordcataloguer.client.ebay.EbaySandboxClient;
-import com.recordcataloguer.recordcataloguer.client.ebay.EbayUrls;
-import com.recordcataloguer.recordcataloguer.helpers.encode.ImageEncodingHelper;
+import com.recordcataloguer.recordcataloguer.constants.auth.ebay.EbayUrls;
+import com.recordcataloguer.recordcataloguer.helpers.image.encode.ImageEncodingHelper;
 import com.recordcataloguer.recordcataloguer.helpers.httpclienthelper.HttpHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

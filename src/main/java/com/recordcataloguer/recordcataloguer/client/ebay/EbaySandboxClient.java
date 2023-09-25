@@ -1,5 +1,6 @@
 package com.recordcataloguer.recordcataloguer.client.ebay;
 
+import com.recordcataloguer.recordcataloguer.constants.auth.ebay.EbayUrls;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

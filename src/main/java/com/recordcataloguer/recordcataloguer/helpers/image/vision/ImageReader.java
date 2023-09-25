@@ -1,8 +1,7 @@
-package com.recordcataloguer.recordcataloguer.helpers.image;
+package com.recordcataloguer.recordcataloguer.helpers.image.vision;
 
 import com.google.cloud.vision.v1.*;
 import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
-import com.recordcataloguer.recordcataloguer.helpers.regex.ImageReaderRegex;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

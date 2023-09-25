@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.helpers.auth;
+package com.recordcataloguer.recordcataloguer.helpers.discogs.auth;
 
 import com.recordcataloguer.recordcataloguer.dto.discogs.request.OAuthRequest;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AuthHelperTest {
+public class DiscogsAuthHelperTest {
 
     @Test
     public void generateAuthorizationHeaderShouldWork() {

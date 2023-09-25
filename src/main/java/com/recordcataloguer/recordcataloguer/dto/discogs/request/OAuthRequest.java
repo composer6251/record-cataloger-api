@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.dto.discogs.request;
 
-import com.recordcataloguer.recordcataloguer.constants.auth.DiscogsTokens;
-import com.recordcataloguer.recordcataloguer.constants.auth.OAuthRequestConstants;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.OAuthRequestConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
