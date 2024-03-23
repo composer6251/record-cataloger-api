@@ -4,13 +4,16 @@ import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsToken
 import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsUserCredentials;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
-import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
-import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
-import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
-import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
-import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
+import com.recordcataloguer.recordcataloguer.dto.discogs.request.OAuthRequest;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.*;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.collectionapi.DiscogsCollectionResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.collectionapi.Release;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.collectionapi.UserCollectionByFolderResponse;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.marketplaceapi.DiscogsUserInventoryResponse;
+import com.recordcataloguer.recordcataloguer.util.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.util.discogs.auth.DiscogsAuthHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.validators.DiscogsSearchResultValidator;
+import com.recordcataloguer.recordcataloguer.util.string.StringHelper;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +36,40 @@ public class DiscogsServiceMobile {
      *Add way to determine if album is actual duplicate
      *      a. apache getCommonPrefix????
      * ***/
-
     @Autowired
     private DiscogsClient discogsClient;
 
     @Autowired
     private DiscogsService discogsService;
+
+
+    /********USER COLLECTION METHODS******/
+
+    public List<Release> getUserCollectionByFolderId(String userName, int folderId) {
+        log.info("received request to getUserCollection with user name: {}", userName);
+
+        String authorizationHeader = DiscogsAuthHelper.generateOAuthHeaderForInventoryRequest(DiscogsTokens.DISCOG_OAUTH_TOKEN_FOR_USER_ACTION, DiscogsTokens.DISCOG_OAUTH_TOKEN_SECRET_FOR_USER_ACTION);
+        UserCollectionByFolderResponse userCollectionResponse = discogsClient.getCollectionReleasesByFolderId(authorizationHeader, userName, folderId);
+        // List<Listing> filteredAlbums = DiscogsSearchResultValidator.filterOutResponseDuplicates(userCollectionResponse.getListings());
+
+        return userCollectionResponse.getReleases();
+    }
+
+
+    /*********USER INVENTORY ENDPOINTS********/
+
+    public List<Listing> getUserInventory(String userName) {
+        log.info("received request to getUserCollection with user name: {}", userName);
+
+        DiscogsUserInventoryResponse response = discogsClient.getUserInventoryByUserNameAndToken(DiscogsTokens.DISCOGS_PERSONAL_ACCESS_TOKEN, userName);
+        String authorizationHeader = DiscogsAuthHelper.generateOAuthHeaderForInventoryRequest(DiscogsTokens.DISCOG_OAUTH_TOKEN_FOR_USER_ACTION, DiscogsTokens.DISCOG_OAUTH_TOKEN_SECRET_FOR_USER_ACTION);
+        DiscogsUserInventoryResponse userCollectionResponse = discogsClient.getUserInventoryByUserName(authorizationHeader, userName);
+        // List<Listing> filteredAlbums = DiscogsSearchResultValidator.filterOutResponseDuplicates(userCollectionResponse.getListings());
+
+        return userCollectionResponse.getListings();
+    }
+
+    /*******DATABASE SEARCH ENDPOINTS********/
 
     /***
      * Get all records by catalog number only, without analyzing image.
@@ -58,13 +89,12 @@ public class DiscogsServiceMobile {
         return filteredAlbums;
     }
 
-
     /***
      * Get all records by catalog number only, without analyzing image and persist to DB
      * @param catalogNumber
      * @return
      */
-    public List<Album> getRecordsByCatalogNumber(String catalogNumber) {
+    public List<Album> getAlbumsByCatalogNumber(String catalogNumber) {
         log.info("received request to getRecordsByCatalogNumber with catalogNumber {}", catalogNumber);
 
         DiscogsSearchResponse albums = discogsClient.getDiscogsRecordByCategoryNumber(
@@ -77,16 +107,50 @@ public class DiscogsServiceMobile {
             log.info("Persisting {} albums to DB", filteredAlbums.size());
             HibernateUtil.persistAlbumsToDBController(albumsWithPricing);
         } catch (Exception e) {
-            log.error("Error persisting albums to DB for catNo {} \n {}", e.getMessage());
+            log.error("Error persisting albums to DB for catalogNumber {} \n {}", catalogNumber, e.getMessage());
         }
 
         return albumsWithPricing;
     }
 
+
+
+    public static String generateOAuthHeaderForIdentityRequest(String oAuthToken, String oAuthTokenSecret) {
+
+        OAuthRequest oAuthRequest = new OAuthRequest();
+
+        String accessTokenAuthHeader =
+                "OAuth oauth_consumer_key=\"" + DiscogsTokens.DISCOGS_CONSUMER_KEY + "\"," +
+                        "oauth_token=\"" + oAuthToken + "\"," +
+                        "oauth_signature_method=\"PLAINTEXT\"," +
+                        "oauth_timestamp=\"" + oAuthRequest.getOauth_timestamp() + "\"," +
+                        "oauth_nonce=\"" + oAuthRequest.getOauth_nonce() + "\"," +
+                        "oauth_version=\"" + oAuthRequest.getOauth_version() + "\"," +
+                        "oauth_signature=\"" + oAuthRequest.getOauth_signature();
+
+        return accessTokenAuthHeader;
+    }
+
+    /***
+     * Get album collection for given userName. Requires authentication as user.
+     * @param userName
+     * @return
+     */
+    /****TODO: COLLECTIONS DO NOT INCLUDE ALL THE INFORMATION NEEDED. CAN THIS BE DELETED????*****/
+//    public List<Album> getUserCollection(String userName) {
+//        log.info("received request to getUserCollection with user name: {}", userName);
+//
+//        String authHeader = DiscogsAuthHelper.generateAuthorizationForUserActions(DiscogsTokens.DISCOGS_OAUTH_TOKEN, DiscogsTokens.DISCOGS_OAUTH_TOKEN_SECRET);
+//        DiscogsCollectionResponse userCollectionResponse = discogsClient.getUserCollectionByUserName(authHeader, userName);
+//
+//        List<Album> filteredAlbums = DiscogsSearchResultValidator.filterOutResponseDuplicates(userCollectionResponse.getAlbums());
+//
+//        return filteredAlbums;
+//    }
     /***
      * Publish album to uncategorized collection.
      * @param releaseId
-     * @return
+     * @return HttpStatus
      */
     public HttpStatus publishAlbumToUserCollection(String releaseId, int folderId) {
         log.info("received request to publishAlbum with releaseId {} and folderId {}", releaseId, folderId);

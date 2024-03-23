@@ -1,8 +1,10 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
 import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.Listing;
+import com.recordcataloguer.recordcataloguer.dto.discogs.response.collectionapi.Release;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
-import com.recordcataloguer.recordcataloguer.helpers.image.vision.ImageReader;
+import com.recordcataloguer.recordcataloguer.util.image.vision.ImageReader;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsServiceMobile;
@@ -40,11 +42,10 @@ public class DiscogsController {
     private DiscogsServiceMobile discogsServiceMobile;
 
     /**************************GET ENDPOINTS*************************/
-
     @GetMapping(value = "/getAlbumsByCatalogNumberFromMobile")
     public ResponseEntity<List<Album>> getAlbumsByCatalogNumberFromMobile(@RequestParam String catalogNumber) {
         log.debug("Request received to getRecordsByCatNoMobile by catNo: {}", catalogNumber);
-        List<Album> albums = discogsServiceMobile.getRecordsByCatalogNumber(catalogNumber);
+        List<Album> albums = discogsServiceMobile.getAlbumsByCatalogNumber(catalogNumber);
         log.debug("Response returned with {} albums", albums.size());
         albums.forEach(album -> log.debug("Album: {} {}", album.getTitle(), album.getReleaseId()));
         return new ResponseEntity(albums, HttpStatus.OK);
@@ -55,13 +56,6 @@ public class DiscogsController {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
         List<Album> albums = discogsService.getRecordsBySpineText(url, separatorDistance);
         return new ResponseEntity(albums, HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/getImageTextForUser")
-    public ResponseEntity<List<String>> getImageTextForUser(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        String results = discogsService.extractTextFromImage(url);
-        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
     }
 
     @GetMapping(value = "/getRecordsFromRawText")
@@ -94,17 +88,34 @@ public class DiscogsController {
         return new ResponseEntity(albums, HttpStatus.OK);
     }
 
-    @GetMapping(
-            value = "/getRecordThumbnailsByImage",
-            produces = MediaType.IMAGE_GIF_VALUE
-    )
-    public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
-        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
-        List<Album> albums = discogsService.getRecordsBySpineText(url, separatorDistance);
-        return new ResponseEntity(albums, HttpStatus.OK);
+    /**************************USER INVENTORY ENDPOINTS*************************/
+    @GetMapping(value = "/getUserInventory")
+    public ResponseEntity getUserInventory(@RequestParam @NonNull String userName) {
+        log.debug("Request received to get user Inventory for user: {}", userName);
+
+        List<Listing> response = discogsServiceMobile.getUserInventory(userName);
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
-    /**************************PUBLISH ENDPOINTS*************************/
+    /**************************USER COLLECTION ENDPOINTS*************************/
+
+    @GetMapping(value = "/getUserCollectionByFolderId")
+    public ResponseEntity getUserCollectionByFolderId(@RequestParam @NonNull String username, @RequestParam @NonNull int folderId) {
+        log.debug("Request received to get user collection for user: {}", username);
+
+        List<Release> response = discogsServiceMobile.getUserCollectionByFolderId(username, folderId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    /***TODO: CAN THIS BE DELETED?? COLLECTIONS DON'T HAVE ALL THE INFO I NEED.***/
+//    @GetMapping(value = "/getUserCollection")
+//    public ResponseEntity getUserCollection(@RequestParam @NonNull String userName) {
+//        log.debug("Request received to get user collection for user: {}", userName);
+//
+//        List<Album> response = discogsServiceMobile.getUserCollection(userName);
+//        return new ResponseEntity(response, HttpStatus.OK);
+//    }
+
     @PostMapping(value = "/publishAlbumUncategorized")
     public ResponseEntity<String> publishAlbum(@RequestParam @NonNull String releaseId, @RequestParam int folderId) {
         log.debug("Request received to publish album with releaseId: {}", releaseId);
@@ -121,6 +132,25 @@ public class DiscogsController {
     }
 
     /**************************EXTRACT TEXT ENDPOINTS*************************/
+
+    @GetMapping(value = "/getImageTextForUser")
+    public ResponseEntity<List<String>> getImageTextForUser(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        String results = discogsService.extractTextFromImage(url);
+        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+    }
+
+    @GetMapping(
+            value = "/getRecordThumbnailsByImage",
+            produces = MediaType.IMAGE_GIF_VALUE
+    )
+    public ResponseEntity<List<Album>> getRecordThumbnailsByImage(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
+        log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
+        List<Album> albums = discogsService.getRecordsBySpineText(url, separatorDistance);
+        return new ResponseEntity(albums, HttpStatus.OK);
+    }
+
+
     @GetMapping("/extractTextFromImage")
     public String extractTextFromImage(@RequestParam @NonNull String url) {
         log.error("Request received to lookup records from Discogs with imageUrl: {}", url);

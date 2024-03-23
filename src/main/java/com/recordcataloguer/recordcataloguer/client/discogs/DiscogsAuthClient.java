@@ -12,19 +12,19 @@ import java.net.http.HttpResponse;
 public interface DiscogsAuthClient {
 
     @GetMapping(value = DiscogsUrls.OAUTH_API + DiscogsUrls.REQUEST_TOKEN_ENDPOINT, consumes = "application/x-www-form-urlencoded")
-    String requestOAuthToken(
+    String getRequestToken(
             @RequestHeader("Authorization") String auth,
             @RequestHeader("User-Agent") String userAgent
     );
 
     @PostMapping(value = DiscogsUrls.OAUTH_API + DiscogsUrls.ACCESS_TOKEN_ENDPOINT, consumes = "application/x-www-form-urlencoded")
-    String requestAccessToken(
+    String getAccessToken(
             @RequestHeader("Authorization") String auth,
             @RequestHeader("User-Agent") String userAgent
     );
 
     @GetMapping(value = DiscogsUrls.OAUTH_API + DiscogsUrls.IDENTITY_ENDPOINT, consumes = "application/x-www-form-urlencoded")
-    HttpResponse verifyUserIdentity(
+    String verifyUserIdentity(
             @RequestHeader("Authorization") String auth,
             @RequestHeader("User-Agent") String userAgent
     );
