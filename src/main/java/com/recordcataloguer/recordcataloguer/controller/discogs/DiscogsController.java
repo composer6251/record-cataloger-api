@@ -41,11 +41,42 @@ public class DiscogsController {
     @Autowired
     private DiscogsServiceMobile discogsServiceMobile;
 
-    /**************************GET ENDPOINTS*************************/
+
+
+    /**************************USER COLLECTION ENDPOINTS*************************/
+
+    @GetMapping(value = "/getUserCollectionByFolderId")
+    public ResponseEntity getUserCollectionByFolderId(@RequestParam @NonNull String username, @RequestParam @NonNull int folderId) {
+        log.debug("Request received to get user collection for user: {}", username);
+
+        List<Release> response = discogsService.getUserCollectionByFolderId(username, folderId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/publishAlbumUncategorized")
+    public ResponseEntity<String> publishAlbum(@RequestParam @NonNull String releaseId, @RequestParam int folderId) {
+        log.debug("Request received to publish album with releaseId: {}", releaseId);
+
+        HttpStatus response = discogsService.publishAlbumToUserCollection(releaseId, folderId);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+
+
+    /**************************USER INVENTORY ENDPOINTS*************************/
+    @GetMapping(value = "/getUserInventory")
+    public ResponseEntity getUserInventory(@RequestParam @NonNull String userName) {
+        log.debug("Request received to get user Inventory for user: {}", userName);
+
+        List<Listing> response = discogsService.getUserInventory(userName);
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    /**************************DATABASE ENDPOINTS*************************/
     @GetMapping(value = "/getAlbumsByCatalogNumberFromMobile")
     public ResponseEntity<List<Album>> getAlbumsByCatalogNumberFromMobile(@RequestParam String catalogNumber) {
         log.debug("Request received to getRecordsByCatNoMobile by catNo: {}", catalogNumber);
-        List<Album> albums = discogsServiceMobile.getAlbumsByCatalogNumber(catalogNumber);
+        List<Album> albums = discogsService.getAlbumsByCatalogNumber(catalogNumber);
         log.debug("Response returned with {} albums", albums.size());
         albums.forEach(album -> log.debug("Album: {} {}", album.getTitle(), album.getReleaseId()));
         return new ResponseEntity(albums, HttpStatus.OK);
@@ -86,49 +117,6 @@ public class DiscogsController {
 
         List<AlbumEntity> albums = discogsService.getAllDiscogsCatalogNumbers();
         return new ResponseEntity(albums, HttpStatus.OK);
-    }
-
-    /**************************USER INVENTORY ENDPOINTS*************************/
-    @GetMapping(value = "/getUserInventory")
-    public ResponseEntity getUserInventory(@RequestParam @NonNull String userName) {
-        log.debug("Request received to get user Inventory for user: {}", userName);
-
-        List<Listing> response = discogsServiceMobile.getUserInventory(userName);
-        return new ResponseEntity(response, HttpStatus.OK);
-    }
-
-    /**************************USER COLLECTION ENDPOINTS*************************/
-
-    @GetMapping(value = "/getUserCollectionByFolderId")
-    public ResponseEntity getUserCollectionByFolderId(@RequestParam @NonNull String username, @RequestParam @NonNull int folderId) {
-        log.debug("Request received to get user collection for user: {}", username);
-
-        List<Release> response = discogsServiceMobile.getUserCollectionByFolderId(username, folderId);
-        return new ResponseEntity(response, HttpStatus.OK);
-    }
-
-    /***TODO: CAN THIS BE DELETED?? COLLECTIONS DON'T HAVE ALL THE INFO I NEED.***/
-//    @GetMapping(value = "/getUserCollection")
-//    public ResponseEntity getUserCollection(@RequestParam @NonNull String userName) {
-//        log.debug("Request received to get user collection for user: {}", userName);
-//
-//        List<Album> response = discogsServiceMobile.getUserCollection(userName);
-//        return new ResponseEntity(response, HttpStatus.OK);
-//    }
-
-    @PostMapping(value = "/publishAlbumUncategorized")
-    public ResponseEntity<String> publishAlbum(@RequestParam @NonNull String releaseId, @RequestParam int folderId) {
-        log.debug("Request received to publish album with releaseId: {}", releaseId);
-
-        HttpStatus response = discogsServiceMobile.publishAlbumToUserCollection(releaseId, folderId);
-        return new ResponseEntity(response, HttpStatus.OK);
-    }
-
-    /**************************AUTH ENDPOINTS*************************/
-    @GetMapping(value = "/authenticate")
-    public String authenticate() {
-        log.debug("Request received to authenticate User with Discogs");
-        return discogsService.getAuthorizationUrl();
     }
 
     /**************************EXTRACT TEXT ENDPOINTS*************************/

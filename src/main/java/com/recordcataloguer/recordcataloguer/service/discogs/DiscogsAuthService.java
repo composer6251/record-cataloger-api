@@ -170,7 +170,7 @@ public class DiscogsAuthService {
     }
 
     private Map<String, String> getOauthToken() {
-        // Get OAuth TOken response
+        // Get OAuth Token response
         String response = discogsAuthClient.getRequestToken(DiscogsAuthHelper.generateOAuthHeaderForOAuthTokenRequest(), "record-cataloger/1.0");
         // create map of response for k-v pair
         Map<String, String> oAuthTokenResponse = getOAuthInfoFromDiscogsAuthResponse(response);
