@@ -31,7 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
-/src/main/resources/*
 
 ### Auth ###
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DiscogsTokens.java
@@ -39,6 +38,10 @@ build/
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DiscogsUserCredentials.java
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/*
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/LocalHostUrls.java
+/src/main/resources/*
+
+### Database ###
+/src/main/java/com/recordcataloguer/recordcataloguer/database/mongodb/constants/MongoDbConstants.java
 
 ### MISC ###
-interviews.md
+how-to.md

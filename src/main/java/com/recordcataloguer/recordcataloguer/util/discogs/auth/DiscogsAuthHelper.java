@@ -19,7 +19,6 @@ public class DiscogsAuthHelper {
     private static String accessTokenAuthHeader;
     private static String userActionAuthHeader;
 
-
     public static String generateOAuthHeaderForRequestToken() {
 
         OAuthRequest oAuthRequest = new OAuthRequest();
@@ -35,11 +34,6 @@ public class DiscogsAuthHelper {
         return userActionAuthHeader;
     }
 
-    public static String getUserDiscogsAuthorization() {
-        String discogsAuthorizationPage = "https://discogs.com/oauth/authorize?oauth_token=<your_oauth_request_token>";
-
-        return "";
-    }
     public static String generateOAuthHeaderForOAuthTokenRequest() {
         if(userActionAuthHeader != null &&!userActionAuthHeader.isEmpty()) return userActionAuthHeader;
 
@@ -88,7 +82,7 @@ public class DiscogsAuthHelper {
         return auth;
     }
 
-    public static String generateOAuthHeaderForInventoryRequest(String oAuthToken, String oAuthTokenSecret) {
+    public static String generateOAuthHeaderRequests(String oAuthToken, String oAuthTokenSecret) {
 
         OAuthRequest oAuthRequest = new OAuthRequest();
 

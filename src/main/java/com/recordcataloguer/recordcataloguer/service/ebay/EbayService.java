@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.service;
+package com.recordcataloguer.recordcataloguer.service.ebay;
 
 import com.recordcataloguer.recordcataloguer.client.ebay.EbaySandboxClient;
 import com.recordcataloguer.recordcataloguer.constants.auth.ebay.EbayUrls;
@@ -34,19 +34,19 @@ public class EbayService {
 
 
     // todo: Determine if this still works
-    public HttpStatus getEbayAuthorization() throws IOException {
-        String binaryOfEncodedImage = ImageEncodingHelper.encodeImage(filePath, "");
-        ImageEncodingHelper.decodeImage(binaryOfEncodedImage, "/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/test");
-        ImageEncodingHelper.decodeImage(binaryOfEncodedImage, "/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/testPicture.jpg");
-
-        log.info("Sending ebay authorization request");
-        ResponseEntity<String> authorizationResponse = ebayClient.getEbaySandboxAuthorization(contentType, authorization, grant);
-        log.info("Received ebay authorization response with status code {} and response {}", authorizationResponse.getStatusCode(), authorizationResponse.getBody());
-        if (authorizationResponse.getStatusCode().is2xxSuccessful()) {
-            ebayAuthorizationToken = authorizationResponse.getBody();
-        }
-        return authorizationResponse.getStatusCode();
-    }
+//    public HttpStatusCode getEbayAuthorization() throws IOException {
+//        String binaryOfEncodedImage = ImageEncodingHelper.encodeImage(filePath, "");
+//        ImageEncodingHelper.decodeImage(binaryOfEncodedImage, "/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/test");
+//        ImageEncodingHelper.decodeImage(binaryOfEncodedImage, "/Users/david/Coding Projects/record-cataloguer-api/src/main/resources/images/testPicture.jpg");
+//
+//        log.info("Sending ebay authorization request");
+//        ResponseEntity<String> authorizationResponse = ebayClient.getEbaySandboxAuthorization(contentType, authorization, grant);
+//        log.info("Received ebay authorization response with status code {} and response {}", authorizationResponse.getStatusCode(), authorizationResponse.getBody());
+//        if (authorizationResponse.getStatusCode().is2xxSuccessful()) {
+//            ebayAuthorizationToken = authorizationResponse.getBody();
+//        }
+//        return authorizationResponse.getStatusCode();
+//    }
 
     public HttpResponse searchAlbumByArtistAndNameHttp(String artist, String name)
             throws URISyntaxException, IOException, InterruptedException {

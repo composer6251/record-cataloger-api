@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.util.hibernate;
+package com.recordcataloguer.recordcataloguer.database.hibernate;
 
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Community;

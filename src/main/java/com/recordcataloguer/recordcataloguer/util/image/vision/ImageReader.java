@@ -5,7 +5,7 @@ import com.recordcataloguer.recordcataloguer.util.discogs.DiscogsServiceHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
+//import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
@@ -33,24 +33,24 @@ public class ImageReader {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    @Autowired
-    private CloudVisionTemplate cloudVisionTemplate;
+//    @Autowired
+//    private CloudVisionTemplate cloudVisionTemplate;
 
     // get text from image
-    public List<String> extractCatalogueNumberFromImage(String imageUrl) {
-        String text =
-                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
-
-        List<String> catalogueNumbers = DiscogsServiceHelper.extractRecordCatalogueNumber(text);
-
-        return catalogueNumbers;
-    }
-
-    private void updateAlbumString(EntityAnnotation entityAnnotation, EntityAnnotation entityAnnotation2) {
-        if(compareVerts(entityAnnotation.getBoundingPoly().getVertices(0).getX(), entityAnnotation2.getBoundingPoly().getVertices(0).getX())) {
-            currentAlbumString.append(" " + entityAnnotation2.getDescription());
-        }
-    }
+//    public List<String> extractCatalogueNumberFromImage(String imageUrl) {
+//        String text =
+//                this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageUrl));
+//
+//        List<String> catalogueNumbers = DiscogsServiceHelper.extractRecordCatalogueNumber(text);
+//
+//        return catalogueNumbers;
+//    }
+//
+//    private void updateAlbumString(EntityAnnotation entityAnnotation, EntityAnnotation entityAnnotation2) {
+//        if(compareVerts(entityAnnotation.getBoundingPoly().getVertices(0).getX(), entityAnnotation2.getBoundingPoly().getVertices(0).getX())) {
+//            currentAlbumString.append(" " + entityAnnotation2.getDescription());
+//        }
+//    }
 
     private boolean compareVerts(int vert1, int vert2) {
         Integer diff = vert1 - vert2;
@@ -58,105 +58,105 @@ public class ImageReader {
         return diff < 30 && diff > -30;
     }
 
-    public List<EntityAnnotation> getVisionEntityAnnotations(String imageUrl) {
-        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
-        AnnotateImageResponse test = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.IMAGE_PROPERTIES);
-//        ImageContextOrBuilder imageContext = new I
-        return new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
-    }
+//    public List<EntityAnnotation> getVisionEntityAnnotations(String imageUrl) {
+//        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
+//        AnnotateImageResponse test = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.IMAGE_PROPERTIES);
+////        ImageContextOrBuilder imageContext = new I
+//        return new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
+//    }
 
     StringBuilder currentAlbumString = new StringBuilder();
 
-    public String extractRawVisionText(String imageUrl) {
-        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
-        return annotateImageResponse.getTextAnnotationsList().get(0).getDescription();
-    }
+//    public String extractRawVisionText(String imageUrl) {
+//        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageUrl), Feature.Type.TEXT_DETECTION);
+//        return annotateImageResponse.getTextAnnotationsList().get(0).getDescription();
+//    }
 
     public List<String> splitRawVisionText(String text) {
         return Arrays.asList(StringUtils.split(text, "\n"));
     }
 
-    public String extractTextFromImage(String imageURL, int separatorDistance) {
-        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageURL), Feature.Type.TEXT_DETECTION);
-        // List must be mutable in order to remove matched annotations
-        List<EntityAnnotation> annotations = new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
-
-        DiscogsServiceHelper.getSearchStringsByImageVertices(annotations, separatorDistance);
-        DiscogsServiceHelper.getNextAlbumAnnotations(annotations);
-
-        DiscogsServiceHelper.getAlbumsForLookup(annotations, 10);
-
-        Map<Integer, String> albumMap = DiscogsServiceHelper.populateMap(annotations, 50);
-
-
-        List<NormalizedVertex> test = annotations.get(0).getBoundingPoly().getNormalizedVerticesList();
-        // Get base vertices: X-max, X-min, Y-max, y-min
-        // get closest values for each, if with 400, then it is the next record and not random picture text
-        // Compare start with the highest x: This is the right most record
-
-        EntityAnnotation initialAnnotation = annotations.get(0);
-        BoundingPoly initialBoundingPoly = initialAnnotation.getBoundingPoly();
-        Integer initialXVert = initialBoundingPoly.getVertices(0).getX();
-
-        Vertex farthestRightAlbumVertex = Vertex.newBuilder().build();
-        Vertex currentAlbumVertex = Vertex.newBuilder().build();
-        List<String> albumStrings = new ArrayList<>();
-        Map<Integer, String> albumStringsMap = new HashMap<>();
-        // TODO: Filter map entries by doing a map.entry.fulltext.contains(partialText)
-        // TODO: Can each value be separated on whether olphanumeric/numeric(catno) or alpha only(title)
-        // TODO: Print out vertices list to see what it is
-        // TODO: print out each annotation vertices and compare difference
-        // TODO:
-        List<Integer> foundAnnotationIndices = new ArrayList<>();
-        foundAnnotationIndices.add(0);
-        for (Integer i = 1; i < annotations.size(); i++) {
-
-            Iterator<EntityAnnotation> annotationsIterator = annotations.listIterator(i);
-
-            StringBuilder currentAlbum = new StringBuilder();
-            int finalI = i;
-            // filter by index of
-            // removeIf() ?
-            // iterator directly
-            // For each element
-            //      for each compare
-            //         true ?
-               //      build string
-                //     add string to map
-                //      add matched element to list
-                //      continue
-            //      for each next
-            //      if iter.annotations contains matchedElemList
-            //          continue or filter(c2 -> matchedElemList.contains(iter.annotations.getIndexOf(c2))
-                //      false ?
-            //
-            annotations.stream().filter(c -> !foundAnnotationIndices.contains(annotations.indexOf(c))).forEachOrdered(c -> {
-//                annotations.removeIf(annotations.)
-//                StringBuilder str = new StringBuilder();
-//                if(!currentAlbum.isEmpty()) currentAlbum.delete(0, str.length() - 1);
-                annotations.forEach(
-                        c2 -> {
-//                            if(foundAnnotationIndices.contains(annotations.indexOf(c2)))    continue;
-                            if(compareVerts(c.getBoundingPoly().getVertices(0).getX(), c2.getBoundingPoly().getVertices(0).getX())) {
-                                log.info("Difference between x axis points {} and {}, updating album entry number {} with value {}",
-                                        c.getBoundingPoly().getVertices(0).getX(), c2.getBoundingPoly().getVertices(0).getX(),
-                                        c2.getDescription());
-                                currentAlbum.append(" ").append(c2.getDescription());
-                                foundAnnotationIndices.add(annotations.indexOf(c2));
-
-                            }
-                        });
-//                if(!currentAlbum.isEmpty()) currentAlbum.delete(0, currentAlbum.length() - 1);
-            }
-
-            );
-                albumStringsMap.put(++finalI, currentAlbum.toString());
-
-            log.info("Done with map entry for album number {} with value\n{}", finalI, currentAlbum);
-        }
-
-        return this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageURL));
-    }
+//    public String extractTextFromImage(String imageURL, int separatorDistance) {
+//        AnnotateImageResponse annotateImageResponse = this.cloudVisionTemplate.analyzeImage(this.resourceLoader.getResource(imageURL), Feature.Type.TEXT_DETECTION);
+//        // List must be mutable in order to remove matched annotations
+//        List<EntityAnnotation> annotations = new ArrayList<>(annotateImageResponse.getTextAnnotationsList());
+//
+//        DiscogsServiceHelper.getSearchStringsByImageVertices(annotations, separatorDistance);
+//        DiscogsServiceHelper.getNextAlbumAnnotations(annotations);
+//
+//        DiscogsServiceHelper.getAlbumsForLookup(annotations, 10);
+//
+//        Map<Integer, String> albumMap = DiscogsServiceHelper.populateMap(annotations, 50);
+//
+//
+//        List<NormalizedVertex> test = annotations.get(0).getBoundingPoly().getNormalizedVerticesList();
+//        // Get base vertices: X-max, X-min, Y-max, y-min
+//        // get closest values for each, if with 400, then it is the next record and not random picture text
+//        // Compare start with the highest x: This is the right most record
+//
+//        EntityAnnotation initialAnnotation = annotations.get(0);
+//        BoundingPoly initialBoundingPoly = initialAnnotation.getBoundingPoly();
+//        Integer initialXVert = initialBoundingPoly.getVertices(0).getX();
+//
+//        Vertex farthestRightAlbumVertex = Vertex.newBuilder().build();
+//        Vertex currentAlbumVertex = Vertex.newBuilder().build();
+//        List<String> albumStrings = new ArrayList<>();
+//        Map<Integer, String> albumStringsMap = new HashMap<>();
+//        // TODO: Filter map entries by doing a map.entry.fulltext.contains(partialText)
+//        // TODO: Can each value be separated on whether olphanumeric/numeric(catno) or alpha only(title)
+//        // TODO: Print out vertices list to see what it is
+//        // TODO: print out each annotation vertices and compare difference
+//        // TODO:
+//        List<Integer> foundAnnotationIndices = new ArrayList<>();
+//        foundAnnotationIndices.add(0);
+//        for (Integer i = 1; i < annotations.size(); i++) {
+//
+//            Iterator<EntityAnnotation> annotationsIterator = annotations.listIterator(i);
+//
+//            StringBuilder currentAlbum = new StringBuilder();
+//            int finalI = i;
+//            // filter by index of
+//            // removeIf() ?
+//            // iterator directly
+//            // For each element
+//            //      for each compare
+//            //         true ?
+//               //      build string
+//                //     add string to map
+//                //      add matched element to list
+//                //      continue
+//            //      for each next
+//            //      if iter.annotations contains matchedElemList
+//            //          continue or filter(c2 -> matchedElemList.contains(iter.annotations.getIndexOf(c2))
+//                //      false ?
+//            //
+//            annotations.stream().filter(c -> !foundAnnotationIndices.contains(annotations.indexOf(c))).forEachOrdered(c -> {
+////                annotations.removeIf(annotations.)
+////                StringBuilder str = new StringBuilder();
+////                if(!currentAlbum.isEmpty()) currentAlbum.delete(0, str.length() - 1);
+//                annotations.forEach(
+//                        c2 -> {
+////                            if(foundAnnotationIndices.contains(annotations.indexOf(c2)))    continue;
+//                            if(compareVerts(c.getBoundingPoly().getVertices(0).getX(), c2.getBoundingPoly().getVertices(0).getX())) {
+//                                log.info("Difference between x axis points {} and {}, updating album entry number {} with value {}",
+//                                        c.getBoundingPoly().getVertices(0).getX(), c2.getBoundingPoly().getVertices(0).getX(),
+//                                        c2.getDescription());
+//                                currentAlbum.append(" ").append(c2.getDescription());
+//                                foundAnnotationIndices.add(annotations.indexOf(c2));
+//
+//                            }
+//                        });
+////                if(!currentAlbum.isEmpty()) currentAlbum.delete(0, currentAlbum.length() - 1);
+//            }
+//
+//            );
+//                albumStringsMap.put(++finalI, currentAlbum.toString());
+//
+//            log.info("Done with map entry for album number {} with value\n{}", finalI, currentAlbum);
+//        }
+//
+//        return this.cloudVisionTemplate.extractTextFromImage(this.resourceLoader.getResource(imageURL));
+//    }
 
 //    private String buildAlbumString(List<EntityAnnotation> annotations, EntityAnnotation initialAnnotation, BoundingPoly initialBoundingPoly) {
     //            List<EntityAnnotation> album = annotations.stream()
@@ -240,17 +240,17 @@ public class ImageReader {
 //    }
 
     // Get labels from single Image
-    public List<String> extractLabelFromImage(String imageUrl) {
-
-        AnnotateImageResponse response = cloudVisionTemplate.analyzeImage(
-                resourceLoader.getResource(imageUrl)
-        );
-
-        List<EntityAnnotation> annotations = response.getLabelAnnotationsList();
-        List<String> imageLabels = new ArrayList<>();
-
-        return imageLabels;
-    }
+//    public List<String> extractLabelFromImage(String imageUrl) {
+//
+//        AnnotateImageResponse response = cloudVisionTemplate.analyzeImage(
+//                resourceLoader.getResource(imageUrl)
+//        );
+//
+//        List<EntityAnnotation> annotations = response.getLabelAnnotationsList();
+//        List<String> imageLabels = new ArrayList<>();
+//
+//        return imageLabels;
+//    }
 
     // get text from PDF
 

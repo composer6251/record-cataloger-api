@@ -1,4 +1,4 @@
-package com.recordcataloguer.recordcataloguer.util.database.postgres;
+package com.recordcataloguer.recordcataloguer.database.postgres;
 
 import lombok.extern.slf4j.Slf4j;
 

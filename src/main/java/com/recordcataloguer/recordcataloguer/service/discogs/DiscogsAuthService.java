@@ -24,7 +24,7 @@ public class DiscogsAuthService {
     @Autowired
     private DiscogsAuthClient discogsAuthClient;
 
-    private String oauthToken = "SetcftMTyWckKqqfpaEjXkuazBqPDSMbNnZJTgea";
+    private String oauthToken;
 
     public String generateUserAuthentication() {
         log.info("received request to retrieve user authorization URL");
@@ -82,7 +82,6 @@ public class DiscogsAuthService {
     public String stepTwoAccessToken(String authHeader) {
         // Generate/Send Request
         String resp = discogsAuthClient.getAccessToken(authHeader, DiscogsTokens.USER_AGENT);
-        // Extract OAuth Token from response and generate URL
 
         return resp;
     }

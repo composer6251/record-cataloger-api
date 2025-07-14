@@ -1,15 +1,17 @@
 package com.recordcataloguer.recordcataloguer.controller.discogs;
 
 import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
+import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Listing;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.collectionapi.Release;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
+import com.recordcataloguer.recordcataloguer.service.discogs.UserService;
 import com.recordcataloguer.recordcataloguer.util.image.vision.ImageReader;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsService;
-import com.recordcataloguer.recordcataloguer.service.discogs.DiscogsServiceMobile;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gcp.vision.CloudVisionTemplate;
 import org.springframework.core.io.ResourceLoader;
@@ -28,28 +30,36 @@ public class DiscogsController {
 
     @Autowired
     private DiscogsService discogsService;
-
+    @Autowired
+    private UserService userService;
     @Autowired
     private ResourceLoader resourceLoader;
-
-    @Autowired
-    private CloudVisionTemplate cloudVisionTemplate;
-
+//    @Autowired
+//    private CloudVisionTemplate cloudVisionTemplate;
     @Autowired
     private ImageReader imageReader;
 
-    @Autowired
-    private DiscogsServiceMobile discogsServiceMobile;
 
+    /**************************USER DB SERVICE CALLS****************************/
+    @PostMapping(value = "/insertUser")
+    public ResponseEntity insertUser(@RequestParam @NonNull String username) {
+        log.debug("Request received to insert user {}", username);
+
+       // BsonValue result = userService.insertUserIntoDb(username, DiscogsTokens.MY_OAUTH_VERIFIER_TOKEN, DiscogsTokens.DISCOG_OAUTH_TOKEN_FOR_USER_ACTION, DiscogsTokens.DISCOG_OAUTH_TOKEN_SECRET_FOR_USER_ACTION);
+
+        //return new ResponseEntity(result, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 
     /**************************USER COLLECTION ENDPOINTS*************************/
 
     @GetMapping(value = "/getUserCollectionByFolderId")
-    public ResponseEntity getUserCollectionByFolderId(@RequestParam @NonNull String username, @RequestParam @NonNull int folderId) {
+    public ResponseEntity<List<Album>> getUserCollectionByFolderId(@RequestParam @NonNull String username, @RequestParam @NonNull int folderId) {
         log.debug("Request received to get user collection for user: {}", username);
 
         List<Release> response = discogsService.getUserCollectionByFolderId(username, folderId);
+        log.debug("Returning response with {} albums for username: {}", response.size(), username);
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
@@ -60,8 +70,6 @@ public class DiscogsController {
         HttpStatus response = discogsService.publishAlbumToUserCollection(releaseId, folderId);
         return new ResponseEntity(response, HttpStatus.OK);
     }
-
-
 
     /**************************USER INVENTORY ENDPOINTS*************************/
     @GetMapping(value = "/getUserInventory")
@@ -93,7 +101,8 @@ public class DiscogsController {
     public ResponseEntity<List<String>> getRecordsFromRawText(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
         String results = discogsService.extractTextFromImage(url);
-        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+        //return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(value = "/getSearchStringsByImageVerticesUrl")
@@ -125,7 +134,8 @@ public class DiscogsController {
     public ResponseEntity<List<String>> getImageTextForUser(@RequestParam @NonNull String url, @RequestParam int separatorDistance) {
         log.debug("Request received to lookup records from Discogs with imageUrl: {}", url);
         String results = discogsService.extractTextFromImage(url);
-        return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+        //return new ResponseEntity(discogsService.splitRawText(results), HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping(
@@ -146,13 +156,13 @@ public class DiscogsController {
         return discogsService.extractTextFromImage(url);
     }
 
-    @GetMapping("/extractLabelsFromImage")
-    public ResponseEntity<List<String>> extractLabelsFromImage(@PathVariable String url) {
-
-        log.debug("Request received for text extraction");
-
-        List<String> catalogueNumbers = imageReader.extractLabelFromImage(url);
-
-        return ResponseEntity.of(Optional.of(catalogueNumbers));
-    }
+//    @GetMapping("/extractLabelsFromImage")
+//    public ResponseEntity<List<String>> extractLabelsFromImage(@PathVariable String url) {
+//
+//        log.debug("Request received for text extraction");
+//
+//        List<String> catalogueNumbers = imageReader.extractLabelFromImage(url);
+//
+//        return ResponseEntity.of(Optional.of(catalogueNumbers));
+//    }
 }

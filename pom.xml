@@ -12,7 +12,7 @@
 	<artifactId>record-cataloguer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>record-cataloguer</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Record Cataloger</description>
 	<properties>
 		<java.version>17</java.version>
 		<spring-cloud-gcp.version>3.4.0</spring-cloud-gcp.version>
@@ -64,12 +64,12 @@
 			<version>2.1.1</version>
 		</dependency>
 <!--This is needed to resolve the JAXBException issue due to Java 11 removed this entirely -->
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
-			<version>3.0.0</version>
-			<scope>runtime</scope>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.sun.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-impl</artifactId>-->
+<!--			<version>3.0.0</version>-->
+<!--			<scope>runtime</scope>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
@@ -107,7 +107,7 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
-			<version>42.5.1</version>
+			<version>42.7.3</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.hibernate.orm/hibernate-core -->
 		<dependency>
@@ -126,6 +126,17 @@
 			<groupId>jakarta.transaction</groupId>
 			<artifactId>jakarta.transaction-api</artifactId>
 			<version>2.0.1</version>
+		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.mongodb</groupId>-->
+<!--			<artifactId>mongodb-driver-sync</artifactId>-->
+<!--			<version>5.0.0</version>-->
+<!--		</dependency>-->
+		<!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-driver-core -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongodb-driver-core</artifactId>
+			<version>5.0.0</version>
 		</dependency>
 
 		<dependency>

@@ -1,7 +1,7 @@
 package com.recordcataloguer.recordcataloguer.controller.ebay;
 
 import com.recordcataloguer.recordcataloguer.constants.LocalHostUrls;
-import com.recordcataloguer.recordcataloguer.service.EbayService;
+import com.recordcataloguer.recordcataloguer.service.ebay.EbayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,13 +18,13 @@ public class EbayController {
     @Autowired
     private EbayService ebayService;
 
-    @GetMapping("/ebay/auth")
-    public HttpStatus getEbayAuthorization() throws IOException {
-        log.debug("Request received for ebay auth");
-
-        return ebayService.getEbayAuthorization();
-
-    }
+//    @GetMapping("/ebay/auth")
+//    public HttpStatusCode getEbayAuthorization() throws IOException {
+//        log.debug("Request received for ebay auth");
+//
+//        return ebayService.getEbayAuthorization();
+//
+//    }
 
     @GetMapping("/ebay/searchByArtistAndAlbum")
     public HttpResponse searchByArtistAndAlbum()
