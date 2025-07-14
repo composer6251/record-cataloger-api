@@ -1,0 +1,24 @@
+<!--IMPORTANT: DO NOT COMMIT THIS FILE TO GIT!!!!!!! Config file for hibernate. Hoping to replace with hibernate.properties file located in properties/images-->
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+        <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+        <property name="hibernate.connection.username">record_cataloger_api</property>
+        <property name="hibernate.connection.password">proximal-enfilade9RENEW</property>
+        <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/recordcatalogerdev</property>
+
+        <property name="connection_pool_size">20</property>
+
+<!--        <property name="hbm2ddl.auto">create</property>-->
+
+        <property name="show_sql">true</property>
+
+        <!-- Set the current session context -->
+        <property name="current_session_context_class">thread</property>
+
+    </session-factory>
+</hibernate-configuration>
