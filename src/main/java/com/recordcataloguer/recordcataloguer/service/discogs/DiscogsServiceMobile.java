@@ -4,13 +4,13 @@ import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsToken
 import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsUserCredentials;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
 import com.recordcataloguer.recordcataloguer.constants.DiscogsConstants;
-import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.util.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
-import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.auth.DiscogsAuthHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.validators.DiscogsSearchResultValidator;
+import com.recordcataloguer.recordcataloguer.util.string.StringHelper;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

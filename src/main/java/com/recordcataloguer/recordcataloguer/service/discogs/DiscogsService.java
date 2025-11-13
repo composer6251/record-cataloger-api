@@ -3,17 +3,17 @@ package com.recordcataloguer.recordcataloguer.service.discogs;
 import com.google.cloud.vision.v1.EntityAnnotation;
 import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsClient;
-import com.recordcataloguer.recordcataloguer.helpers.hibernate.HibernateUtil;
+import com.recordcataloguer.recordcataloguer.util.hibernate.HibernateUtil;
 import com.recordcataloguer.recordcataloguer.dto.discogs.request.DiscogsSearchAlbumRequest;
 import com.recordcataloguer.recordcataloguer.entity.AlbumEntity;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.DiscogsServiceHelper;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.validators.DiscogsSearchResultValidator;
-import com.recordcataloguer.recordcataloguer.helpers.image.vision.ImageReader;
-import com.recordcataloguer.recordcataloguer.helpers.string.StringHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.DiscogsServiceHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.validators.DiscogsSearchResultValidator;
+import com.recordcataloguer.recordcataloguer.util.image.vision.ImageReader;
+import com.recordcataloguer.recordcataloguer.util.string.StringHelper;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.Album;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.DiscogsSearchResponse;
 import com.recordcataloguer.recordcataloguer.dto.discogs.response.PriceSuggestionResponse;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
+import com.recordcataloguer.recordcataloguer.util.discogs.auth.DiscogsAuthHelper;
 import feign.FeignException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.recordcataloguer.recordcataloguer.helpers.regex.CatalogNumberRegex.CAT_NO_SIX_AND_GREATER;
+import static com.recordcataloguer.recordcataloguer.util.regex.CatalogNumberRegex.CAT_NO_SIX_AND_GREATER;
 
 @Service
 @Slf4j

@@ -2,8 +2,8 @@ package com.recordcataloguer.recordcataloguer.service.discogs;
 
 import com.recordcataloguer.recordcataloguer.constants.auth.discogs.DiscogsTokens;
 import com.recordcataloguer.recordcataloguer.client.discogs.DiscogsAuthClient;
-import com.recordcataloguer.recordcataloguer.helpers.discogs.auth.DiscogsAuthHelper;
-import com.recordcataloguer.recordcataloguer.helpers.httpclienthelper.HttpUtil;
+import com.recordcataloguer.recordcataloguer.util.discogs.auth.DiscogsAuthHelper;
+import com.recordcataloguer.recordcataloguer.util.httpclienthelper.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

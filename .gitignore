@@ -39,3 +39,6 @@ build/
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/DiscogsUserCredentials.java
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/auth/*
 /src/main/java/com/recordcataloguer/recordcataloguer/constants/LocalHostUrls.java
+
+### MISC ###
+interviews.md
